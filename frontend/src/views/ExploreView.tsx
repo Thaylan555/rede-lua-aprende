@@ -49,7 +49,7 @@ export function ExploreView() {
 
       <section className="lab-workspace">
         {tab === "rede" && <>
-          <LabHeading icon={BrainCircuit} title="Busca inteligente da Rede Lua" text="A Busca Lunar usa Full-Text Search em português e similaridade por trigramas direto no PostgreSQL." badge="LUACORE" />
+          <LabHeading icon={BrainCircuit} title="Busca inteligente da Rede Lua" text="Digite um assunto, matéria ou palavra e a Busca Lunar encontra atividades relacionadas dentro da Rede Lua." badge="REDE LUA" />
           <SearchForm value={draft} onChange={setDraft} onSubmit={submitSearch} placeholder="Ex.: frações, sistema solar, português…" />
           {rede.isLoading ? <Loading /> : rede.isError ? <SourceError /> : rede.data?.activities.length ? <div className="rede-result-grid">{rede.data.activities.map((item) => <RedeActivityCard key={item.id} item={item} />)}</div> : <Empty text="Nenhuma atividade publicada combina com essa busca ainda." />}
         </>}

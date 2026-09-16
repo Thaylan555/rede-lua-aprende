@@ -58,11 +58,11 @@ export function AuthDialog({ open, onClose, preferredRole = "student" }: { open:
         <div className="auth-art">
           <span className="eyebrow"><MoonStar size={16} /> conta Rede Lua</span>
           <h2>Seu espaço para aprender e criar.</h2>
-          <p>Seu acesso agora usa Supabase Auth: e-mail + senha, com sessão persistente e sem Google obrigatório.</p>
+          <p>Entre com e-mail e senha. Seu acesso fica salvo com segurança e você não precisa usar uma conta Google.</p>
           <div className="auth-moon"><img src="/assets/rede-lua/brand/logo-transparent.webp" alt="" /></div>
           <ul>
-            <li><LockKeyhole /> autenticação e sessão pelo Supabase</li>
-            <li><GraduationCap /> permissões protegidas por RLS + código de professor</li>
+            <li><LockKeyhole /> acesso protegido para sua conta</li>
+            <li><GraduationCap /> contas de professor usam um código de acesso</li>
           </ul>
         </div>
         <div className="auth-form-wrap">

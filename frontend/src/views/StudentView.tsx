@@ -16,7 +16,7 @@ export function StudentView({ user, onLogin, onExplore }: { user: SessionUser | 
 
   return <div className="page-width page-pad student-view">
     <header className="constellation-head">
-      <div><span className="eyebrow"><MoonStar size={16} /> Constelação do Aluno</span><h1>Seu céu muda conforme você aprende.</h1><p>O LuaCore transforma respostas em domínio por matéria. Aqui você vê o que já está forte, o que precisa de reforço e três caminhos para hoje.</p></div>
+      <div><span className="eyebrow"><MoonStar size={16} /> Constelação do Aluno</span><h1>Seu céu muda conforme você aprende.</h1><p>Suas respostas ajudam a montar um mapa do seu aprendizado. Aqui você vê o que já está forte, o que precisa de reforço e três caminhos para hoje.</p></div>
       <div className="student-level-orb"><small>NÍVEL</small><strong>{data.profile.level}</strong><span>{data.profile.xp.toLocaleString("pt-BR")} XP</span></div>
     </header>
 

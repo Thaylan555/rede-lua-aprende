@@ -603,8 +603,16 @@ body {
 .lunar-hero { min-height: 720px; gap: 48px; padding-top: 66px; position: relative; isolation: isolate; }
 .lunar-hero::before { content: ""; position: absolute; inset: 28px -12px 24px; border-radius: 44px; background: linear-gradient(135deg, rgba(255,255,255,.7), rgba(232,243,255,.54)); border: 1px solid rgba(21,91,215,.09); z-index: -1; box-shadow: 0 30px 70px rgba(7,29,73,.07); }
 .hero-copy h1 { font-family: ui-rounded, "Nunito", system-ui, sans-serif; font-weight: 950; font-size: clamp(52px, 6.1vw, 86px); line-height: .92; letter-spacing: -.065em; }
-.hero-copy h1 em { font-style: normal; color: var(--blue); position: relative; white-space: nowrap; }
-.hero-copy h1 em::after { content: ""; position: absolute; left: 2%; right: -2%; bottom: -7px; height: 8px; border-radius: 999px; background: var(--gold); transform: rotate(-1.7deg); opacity: .85; }
+.hero-copy h1 em {
+  font-style: normal;
+  color: var(--blue);
+  text-decoration-line: underline;
+  text-decoration-color: var(--gold);
+  text-decoration-thickness: .11em;
+  text-underline-offset: .13em;
+  text-decoration-skip-ink: none;
+}
+.hero-copy h1 em::after { content: none; }
 .hero-lead { color: #526584; font-size: 18px; max-width: 650px; }
 .lunar-ticket { border: 2px dashed rgba(7,29,73,.42); box-shadow: 7px 7px 0 rgba(7,29,73,.1); background: rgba(255,255,255,.82); position: relative; overflow: visible; }
 .lunar-ticket::before, .lunar-ticket::after { content: ""; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: var(--cream); border: 2px solid rgba(7,29,73,.2); top: 50%; transform: translateY(-50%); }
@@ -776,7 +784,7 @@ body {
 @media (max-width: 720px) {
   .lunar-hero::before { inset: 10px -4px 15px; border-radius: 28px; }
   .lunar-hero { padding-top: 34px; }
-  .hero-copy h1 { font-size: clamp(45px,13vw,64px); }
+  .hero-copy h1 { font-size: clamp(43px,12.4vw,60px); line-height: .96; }
   .hero-constellation { min-height: 430px; border-radius: 36% 64% 46% 54% / 58% 38% 62% 42%; box-shadow: 7px 8px 0 var(--navy); }
   .hero-logo { width: 78%; }
   .floating-chip { padding: 8px 9px; transform: none; }
