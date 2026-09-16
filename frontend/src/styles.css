@@ -1487,3 +1487,35 @@ body {
 
 /* v6.5 — ativação de professor na própria conta */
 .teacher-activation{width:min(460px,100%);display:grid;gap:12px;margin:22px auto 10px;text-align:left}.teacher-activation label{display:grid;gap:8px;font-weight:800;color:var(--ink)}.teacher-activation .field{background:#fff}.teacher-activation .button{width:100%;justify-content:center}.teacher-activation small{text-align:center;color:var(--muted)}
+
+/* v6.6 — Sala Viva */
+.reaction-dock { position: relative; }
+.reaction-dock .reaction-hint { width: 100%; text-align: center; font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: rgba(7,29,73,.62); margin-bottom: 2px; }
+.reaction-dock.compact .reaction-hint { text-align: left; }
+.reaction-dock button:disabled { opacity: .65; cursor: wait; }
+.live-reaction-bubbles { min-height: 0; display: flex; justify-content: flex-end; gap: 7px; padding-top: 6px; pointer-events: none; }
+.live-reaction-bubbles > span { display: flex; align-items: center; gap: 5px; max-width: 130px; padding: 5px 8px 5px 5px; background: rgba(255,255,255,.92); color: #071d49; border: 1px solid rgba(255,255,255,.7); border-radius: 999px; box-shadow: 0 5px 18px rgba(7,29,73,.14); animation: reaction-pop .24s ease-out; }
+.live-reaction-bubbles img { width: 26px; height: 26px; object-fit: contain; border-radius: 50%; }
+.live-reaction-bubbles small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px; font-weight: 900; }
+@keyframes reaction-pop { from { opacity: 0; transform: translateY(8px) scale(.88); } to { opacity: 1; transform: none; } }
+.teacher-reaction-feed { margin: 12px 0; padding: 12px; border: 1px solid rgba(255,255,255,.13); border-radius: 14px; background: rgba(255,255,255,.06); }
+.teacher-reaction-feed > div:first-child { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.teacher-reaction-feed > div:first-child span { font-size: 9px; font-weight: 900; letter-spacing: .12em; color: var(--moon); }
+.teacher-reaction-feed > div:first-child strong { font-size: 10px; color: white; }
+.teacher-reaction-feed > small { display: block; margin-top: 8px; color: rgba(255,255,255,.64); font-size: 10px; }
+.teacher-reaction-list { display: flex; gap: 6px; overflow-x: auto; padding-top: 9px; scrollbar-width: none; }
+.teacher-reaction-list::-webkit-scrollbar { display: none; }
+.teacher-reaction-list > span { flex: 0 0 auto; display: grid; grid-template-columns: 28px auto; grid-template-rows: auto auto; column-gap: 6px; align-items: center; min-width: 105px; padding: 6px 8px; border-radius: 11px; background: rgba(255,255,255,.09); }
+.teacher-reaction-list img { grid-row: 1 / span 2; width: 28px; height: 28px; object-fit: contain; border-radius: 50%; background: white; }
+.teacher-reaction-list b { max-width: 92px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 9px; color: white; }
+.teacher-reaction-list em { font-style: normal; font-size: 8px; color: rgba(255,255,255,.63); }
+.activity-actions button:nth-last-child(2) { color: var(--blue); }
+@media (max-width: 720px) {
+  .live-reaction-bubbles { justify-content: flex-start; overflow: hidden; padding-inline: 12px; }
+  .live-reaction-bubbles > span { max-width: 96px; padding-right: 6px; }
+  .live-reaction-bubbles img { width: 23px; height: 23px; }
+  .live-reaction-bubbles small { max-width: 52px; }
+  .reaction-dock { gap: 5px; }
+  .reaction-dock button { width: 44px; height: 44px; padding: 6px; }
+  .reaction-dock.compact button { width: 38px; height: 38px; }
+}

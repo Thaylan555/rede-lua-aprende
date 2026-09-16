@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 import { trackEvent } from "./analytics";
 import { normalizeGameConfig, normalizeQuizTheme } from "./quizTheme";
-import type { Activity, AvatarConfig, AvatarStyle, Difficulty, DraftQuestion, ExperienceMode, ForgeQuestion, GameConfig, GameState, HostGame, ParticipantSession, ProfileTheme, PublicActivity, QuizTheme, Role, SessionResponse, SessionUser, StudentConstellation, TeacherRadar } from "./types";
+import type { Activity, AvatarConfig, AvatarStyle, Difficulty, DraftQuestion, ExperienceMode, ForgeQuestion, GameConfig, GameReaction, GameState, HostGame, ParticipantSession, ProfileTheme, PublicActivity, QuizTheme, Role, SessionResponse, SessionUser, StudentConstellation, TeacherRadar } from "./types";
 
 class ApiError extends Error {
   status: number;
@@ -241,9 +241,15 @@ export const api = {
   },
 
   deleteActivity: async (id: string) => {
-    const { error } = await supabase.from("rede_lua_activities").delete().eq("id", id);
+    const { data, error } = await supabase.rpc("rede_lua_remove_activity", { p_activity_id: id });
     if (error) dbError(error);
-    return { ok: true as const };
+    return data as { ok: true; archived: boolean; message: string };
+  },
+
+  duplicateActivity: async (id: string) => {
+    const { data, error } = await supabase.rpc("rede_lua_duplicate_activity", { p_activity_id: id });
+    if (error) dbError(error);
+    return data as { ok: true; id: string; title: string };
   },
 
   createGame: async (activityId: string) => {
@@ -282,6 +288,22 @@ export const api = {
     const { data, error } = await supabase.rpc("rede_lua_answer", { p_code: code, p_participant_id: participant.id, p_token: participant.token, p_question_id: questionId, p_choice_index: choiceIndex });
     if (error) dbError(error);
     return data as { correct: boolean; awardedPoints: number; speedBonus: number; timedOut: boolean; explanation: string };
+  },
+
+  sendReaction: async (code: string, participant: ParticipantSession, reactionId: GameReaction["reactionId"]) => {
+    const { data, error } = await supabase.rpc("rede_lua_send_reaction", { p_code: code, p_participant_id: participant.id, p_token: participant.token, p_reaction_id: reactionId });
+    if (error) dbError(error);
+    return data as { ok: true; accepted: boolean; throttled?: boolean; reactionId?: string };
+  },
+  gameReactions: async (code: string, participant: ParticipantSession) => {
+    const { data, error } = await supabase.rpc("rede_lua_recent_reactions", { p_code: code, p_participant_id: participant.id, p_token: participant.token, p_limit: 12 });
+    if (error) dbError(error);
+    return { reactions: (Array.isArray(data) ? data : []) as GameReaction[] };
+  },
+  hostReactions: async (code: string) => {
+    const { data, error } = await supabase.rpc("rede_lua_host_recent_reactions", { p_code: code, p_limit: 20 });
+    if (error) dbError(error);
+    return { reactions: (Array.isArray(data) ? data : []) as GameReaction[] };
   },
 
   searchActivities: async (q: string) => {

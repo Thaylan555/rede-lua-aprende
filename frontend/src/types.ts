@@ -165,6 +165,14 @@ export type StudentConstellation = {
   today: { answers: number; correct: number; accuracy: number };
 };
 
+export type GameReaction = {
+  id: string;
+  reactionId: "heart" | "curious" | "happy" | "cool" | "focus" | "idea" | "popcorn" | "shiba";
+  participantId: string;
+  displayName: string;
+  createdAt: number;
+};
+
 export type HostGame = {
   id: string;
   code: string;
