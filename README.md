@@ -64,3 +64,7 @@ A migration principal da v6 está em:
 `supabase/migrations/20260916_rede_lua_megaprofiles_quiz_studio.sql`
 
 Ela adiciona configuração de perfil, configuração visual de atividades, novos campos de pergunta, Storage e RPCs da v6.
+
+## v6.2 — Avatar Fun Studio
+
+O Mega Perfil ganhou uma camada de personalização própria sobre o DiceBear: looks teen, robô, pixel, pirata, gamer, acessórios Lua, efeitos e molduras. As escolhas extras ficam no JSON `avatar_config`. A v6.2 inclui apenas uma migration pequena para liberar os novos estilos `bottts` e `pixel-art` na validação do perfil.

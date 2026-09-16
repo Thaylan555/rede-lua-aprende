@@ -2,7 +2,7 @@ export type Role = "student" | "teacher" | "admin";
 export type Difficulty = "easy" | "medium" | "hard";
 export type ExperienceMode = "classic" | "lunar_rush" | "star_hunt" | "focus";
 export type QuestionType = "single" | "true_false";
-export type AvatarStyle = "adventurer" | "avataaars" | "personas" | "lorelei" | "notionists";
+export type AvatarStyle = "adventurer" | "avataaars" | "personas" | "lorelei" | "notionists" | "bottts" | "pixel-art";
 
 export type AvatarConfig = Record<string, string | number | boolean | string[]>;
 

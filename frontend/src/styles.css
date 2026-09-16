@@ -1180,3 +1180,93 @@ body {
 }
 .rede-lua-live-brand { display:block; margin-top:2px; font-size:8px; text-transform:uppercase; letter-spacing:.08em; opacity:.55; }
 .theme-brand-toggle { margin-top:10px; max-width:240px; }
+
+/* ========================================================================
+   v6.2 — Avatar Fun Studio / Teen-friendly personalization
+   ======================================================================== */
+.lua-avatar { position:relative; width:100%; height:100%; isolation:isolate; }
+.lua-avatar-base { position:absolute; inset:0; z-index:1; overflow:hidden; border-radius:inherit; }
+.lua-avatar-base img { width:100%; height:100%; object-fit:cover; display:block; }
+.lua-gear { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:5; overflow:visible; }
+.lua-head-gear { transform:translateY(-2%); }
+.lua-face-gear { z-index:6; }
+.lua-avatar::after { content:""; position:absolute; inset:2px; border-radius:inherit; z-index:7; pointer-events:none; }
+.lua-avatar.frame-pirate::after { box-shadow:inset 0 0 0 4px #f5bb35,inset 0 0 0 7px #142749; }
+.lua-avatar.frame-tech::after { box-shadow:inset 0 0 0 3px #54e9ff,inset 0 0 0 6px #5d4bd5; clip-path:polygon(0 0,34% 0,34% 3%,66% 3%,66% 0,100% 0,100% 34%,97% 34%,97% 66%,100% 66%,100% 100%,66% 100%,66% 97%,34% 97%,34% 100%,0 100%,0 66%,3% 66%,3% 34%,0 34%); }
+.lua-avatar.frame-arcade::after { box-shadow:inset 0 0 0 4px #ffcf3e,inset 0 0 0 8px #6a44dc; border-radius:12%; }
+.lua-avatar.frame-cosmic::after { border:3px solid rgba(255,224,102,.9); box-shadow:inset 0 0 20px rgba(164,119,255,.4),0 0 15px rgba(164,119,255,.45); }
+.lua-avatar.frame-street::after { box-shadow:inset 0 -7px 0 #65e9ff,inset 7px 0 0 #155bd7; }
+.lua-avatar-compact::after, .lua-avatar-compact .lua-aura, .lua-avatar-compact .lua-gear { display:none; }
+
+.lua-aura { position:absolute; inset:0; z-index:3; pointer-events:none; }
+.lua-aura-neon { inset:9%; border-radius:28%; box-shadow:0 0 16px #31d3ff,0 0 35px rgba(139,80,255,.8),inset 0 0 16px rgba(49,211,255,.45); }
+.lua-aura-stars i { position:absolute; width:8px; height:8px; background:#ffe06a; border:2px solid #071c45; transform:rotate(45deg); border-radius:2px; box-shadow:0 0 9px rgba(255,224,106,.8); }
+.lua-aura-stars i:nth-child(1){left:7%;top:22%}.lua-aura-stars i:nth-child(2){right:8%;top:30%;width:6px;height:6px}.lua-aura-stars i:nth-child(3){left:12%;bottom:20%;width:5px;height:5px}.lua-aura-stars i:nth-child(4){right:13%;bottom:13%;width:9px;height:9px}.lua-aura-stars i:nth-child(5){right:20%;top:8%;width:5px;height:5px}
+.lua-aura-pixels i { position:absolute; width:9px; height:9px; background:#ffcf3e; box-shadow:10px 0 #6a44dc,0 10px #31d3ff; image-rendering:pixelated; }
+.lua-aura-pixels i:nth-child(1){left:6%;top:15%}.lua-aura-pixels i:nth-child(2){right:15%;top:8%;transform:scale(.7)}.lua-aura-pixels i:nth-child(3){left:13%;bottom:12%;transform:scale(.6)}.lua-aura-pixels i:nth-child(4){right:7%;bottom:24%;transform:scale(.8)}.lua-aura-pixels i:nth-child(5){left:4%;top:55%;transform:scale(.5)}.lua-aura-pixels i:nth-child(6){right:26%;bottom:4%;transform:scale(.5)}
+.lua-aura-cosmic { inset:6%; border:2px solid rgba(164,119,255,.55); border-radius:50%; transform:rotate(-14deg); }
+.lua-aura-cosmic i:first-child { position:absolute; width:12px; height:12px; border-radius:50%; background:#ffe066; left:3%; top:46%; box-shadow:0 0 12px #ffe066; }
+.lua-aura-cosmic i:last-child { position:absolute; width:7px; height:7px; border-radius:50%; background:#65e9ff; right:5%; top:22%; box-shadow:0 0 11px #65e9ff; }
+
+.avatar-kit-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.avatar-kit-grid > button { position:relative; min-width:0; border:1.5px solid #cbd6e7; border-radius:19px; background:linear-gradient(160deg,#fff,#f4f7fd); color:var(--navy); text-align:left; padding:12px; cursor:pointer; transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease; }
+.avatar-kit-grid > button:hover { transform:translateY(-2px); border-color:#8aa8df; }
+.avatar-kit-grid > button.active { border:2px solid var(--blue); background:#eef4ff; box-shadow:3px 4px 0 var(--navy); }
+.avatar-kit-grid > button > svg { position:absolute; right:9px; top:9px; width:17px; color:var(--blue); }
+.avatar-kit-grid strong, .avatar-kit-grid small { display:block; }
+.avatar-kit-grid strong { margin-top:9px; font:900 14px/1.1 ui-rounded,system-ui; }
+.avatar-kit-grid small { margin-top:5px; color:var(--muted); font-size:10px; line-height:1.35; }
+.kit-orb { width:70px; height:70px; display:block; overflow:hidden; border:2px solid var(--navy); border-radius:19px; background:#fff; box-shadow:3px 3px 0 rgba(7,29,73,.9); }
+.kit-pirata-lunar { background:#fff1c6; }.kit-robo-neon { background:#0a1635; }.kit-gamer-pixel { background:#24184d; }.kit-mago-cosmico { background:#2b175e; }.kit-street-lunar { background:#dff8ff; }.kit-agente-orbita { background:#11172d; }
+.avatar-random-button { width:100%; justify-content:center; }
+
+.gear-intro { margin:-3px 0 17px; color:var(--muted); line-height:1.55; font-size:12px; }
+.gear-picker { padding:14px 0; border-top:1px solid rgba(7,29,73,.1); }
+.gear-picker:first-of-type { border-top:0; padding-top:0; }
+.gear-picker > strong { display:block; margin-bottom:9px; color:var(--navy); font-size:11px; }
+.gear-picker > div { display:flex; gap:7px; overflow:auto; padding:2px 2px 7px; scrollbar-width:thin; }
+.gear-picker button { position:relative; flex:0 0 auto; min-width:105px; border:1px solid #ced9e9; border-radius:14px; background:#fff; color:var(--navy); padding:10px 10px 9px; display:grid; justify-items:start; gap:7px; font-size:10px; font-weight:850; cursor:pointer; }
+.gear-picker button.active { background:#edf3ff; border:2px solid var(--blue); box-shadow:2px 3px 0 var(--navy); }
+.gear-picker button > svg { position:absolute; right:7px; top:7px; width:14px; color:var(--blue); }
+.gear-swatch { width:31px; height:31px; border-radius:10px; background:#e9eff8; border:1px solid #c7d2e2; position:relative; overflow:hidden; }
+.gear-none::after { content:"—"; position:absolute; inset:0; display:grid; place-items:center; color:#8996aa; font-size:18px; }
+.gear-pirate-hat { background:linear-gradient(180deg,#12284f 0 52%,#f4bc37 53% 65%,#12284f 66%); }
+.gear-headset { background:radial-gradient(circle at 27% 62%,#31d3ff 0 19%,transparent 20%),radial-gradient(circle at 73% 62%,#8f5cff 0 19%,transparent 20%),#e9eff8; }
+.gear-wizard-hat { background:linear-gradient(135deg,transparent 23%,#6546c7 24% 70%,transparent 71%),#ece7ff; }
+.gear-street-cap { background:linear-gradient(160deg,#155bd7 0 62%,#ffd449 63%); }
+.gear-robot-antenna { background:linear-gradient(90deg,transparent 46%,#071c45 47% 54%,transparent 55%),radial-gradient(circle at 50% 20%,#41e5ff 0 14%,transparent 15%),#eef8ff; }
+.gear-eyepatch { background:linear-gradient(18deg,transparent 44%,#101c31 45% 52%,transparent 53%),radial-gradient(circle at 66% 58%,#101c31 0 22%,transparent 23%),#f3f6fa; }
+.gear-neon-visor { background:linear-gradient(135deg,#31d3ff,#a85cff); }
+.gear-star-glasses { background:linear-gradient(45deg,#fff0a8,#ffd449); }
+.gear-mask { background:linear-gradient(180deg,#e9eff8 0 40%,#172a5b 41% 75%,#e9eff8 76%); }
+.gear-stars { background:radial-gradient(circle,#ffd449 0 14%,transparent 15%) 0 0/12px 12px,#142749; }
+.gear-neon { background:linear-gradient(135deg,#31d3ff,#a85cff,#ff65af); }
+.gear-pixels { background:conic-gradient(#6a44dc 25%,#31d3ff 0 50%,#ffcf3e 0 75%,#1e1245 0) 0 0/12px 12px; image-rendering:pixelated; }
+.gear-cosmic { background:radial-gradient(circle at 70% 25%,#ffe066 0 7%,transparent 8%),radial-gradient(circle at 40% 60%,#a477ff 0 13%,transparent 14%),#181038; }
+.gear-pirate { box-shadow:inset 0 0 0 4px #f5bb35,inset 0 0 0 7px #142749; }.gear-tech { box-shadow:inset 0 0 0 4px #54e9ff,inset 0 0 0 7px #5d4bd5; }.gear-arcade { box-shadow:inset 0 0 0 4px #ffcf3e,inset 0 0 0 7px #6a44dc; }.gear-street { box-shadow:inset 0 -6px #65e9ff,inset 6px 0 #155bd7; }
+
+.avatar-detail-drawer { border:0; }
+.avatar-detail-drawer summary { list-style:none; display:flex; align-items:center; justify-content:space-between; gap:15px; cursor:pointer; color:var(--navy); }
+.avatar-detail-drawer summary::-webkit-details-marker { display:none; }
+.avatar-detail-drawer summary > span { display:flex; align-items:center; gap:9px; font:900 17px/1.2 ui-rounded,system-ui; }
+.avatar-detail-drawer summary > span svg { width:21px; color:var(--blue); }
+.avatar-detail-drawer summary > small { max-width:330px; text-align:right; color:var(--muted); line-height:1.4; }
+.avatar-detail-content { margin-top:17px; padding-top:17px; border-top:1px solid rgba(7,29,73,.12); }
+
+.user-chip-avatar .lua-avatar { border-radius:50%; overflow:hidden; }
+.user-chip-avatar .lua-avatar-base { border-radius:50%; }
+.profile-avatar-shell .lua-avatar, .profile-avatar-shell .lua-avatar-base { border-radius:40px; }
+
+@media (max-width: 760px) {
+  .avatar-kit-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .avatar-kit-grid > button { padding:10px; }
+  .kit-orb { width:62px; height:62px; }
+  .gear-picker button { min-width:98px; }
+  .avatar-detail-drawer summary { align-items:flex-start; flex-direction:column; }
+  .avatar-detail-drawer summary > small { text-align:left; }
+}
+
+@media (max-width: 430px) {
+  .avatar-kit-grid { grid-template-columns:1fr 1fr; gap:8px; }
+  .avatar-kit-grid > button { min-height:142px; }
+}

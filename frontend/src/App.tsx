@@ -12,7 +12,7 @@ import { TeacherView } from "./views/TeacherView";
 import { GameView } from "./views/GameView";
 import { StudentView } from "./views/StudentView";
 import { ProfileView } from "./views/ProfileView";
-import { buildAvatarUrl } from "./avatar";
+import { AvatarVisual } from "./components/AvatarVisual";
 import type { Role } from "./types";
 
 export type View = "home" | "explore" | "student" | "profile" | "teacher" | "game";
@@ -90,7 +90,7 @@ export default function App() {
         <button className="brand-button" onClick={() => go("home")}><Brand compact /></button>
         <nav className="desktop-nav" aria-label="Navegação principal">{navItems.map(({ id, label, icon: Icon }) => <button key={id} className={view === id ? "active" : ""} onClick={() => go(id)}><Icon /> {label}</button>)}</nav>
         <div className="header-account">
-          {user ? <><button className="user-chip" onClick={() => go("profile")}><span className="user-chip-avatar"><img src={buildAvatarUrl(user.avatarStyle, user.avatarSeed, user.avatarConfig, 72)} alt="" /></span><div><strong>{user.displayName}</strong><small>{user.role === "teacher" ? "Professor" : user.role === "admin" ? "Gestão" : `Nível ${user.level}`}</small></div></button><button className="icon-button" onClick={() => logout.mutate()} title="Sair"><LogOut /></button></> : <button className="login-button" onClick={() => openAuth("student")}><UserRound /> Entrar</button>}
+          {user ? <><button className="user-chip" onClick={() => go("profile")}><span className="user-chip-avatar"><AvatarVisual style={user.avatarStyle} seed={user.avatarSeed} config={user.avatarConfig} size={72} compact /></span><div><strong>{user.displayName}</strong><small>{user.role === "teacher" ? "Professor" : user.role === "admin" ? "Gestão" : `Nível ${user.level}`}</small></div></button><button className="icon-button" onClick={() => logout.mutate()} title="Sair"><LogOut /></button></> : <button className="login-button" onClick={() => openAuth("student")}><UserRound /> Entrar</button>}
         </div>
       </div>
     </header>
