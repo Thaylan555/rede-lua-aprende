@@ -20,6 +20,7 @@ export function TeacherView({ user, onLogin }: { user: SessionUser | null; onLog
   const [activeGameCode, setActiveGameCode] = useState<string | null>(null);
   const [form, setForm] = useState(blankForm);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [teacherCode, setTeacherCode] = useState("");
 
   const activities = useQuery({ queryKey: ["activities", "mine"], queryFn: api.myActivities, enabled: canTeach });
   const forge = useQuery({ queryKey: ["forge-questions", form.subject], queryFn: () => api.forgeQuestions(form.subject), enabled: canTeach, staleTime: 20_000 });
@@ -44,9 +45,18 @@ export function TeacherView({ user, onLogin }: { user: SessionUser | null; onLog
   const deleteActivity = useMutation({ mutationFn: api.deleteActivity, onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ["activities", "mine"] }); toast.success("Atividade removida."); }, onError: (error: Error) => toast.error(error.message) });
   const startGame = useMutation({ mutationFn: () => api.startGame(activeGameCode!), onSuccess: async () => { await host.refetch(); toast.success("Partida iniciada!"); }, onError: (error: Error) => toast.error(error.message) });
   const nextQuestion = useMutation({ mutationFn: () => api.nextQuestion(activeGameCode!), onSuccess: async (data) => { await host.refetch(); if (data.finished) toast.success("Partida finalizada."); }, onError: (error: Error) => toast.error(error.message) });
+  const activateTeacher = useMutation({
+    mutationFn: () => api.activateTeacher(teacherCode),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["session"] });
+      toast.success("Conta de professor ativada!");
+      setTeacherCode("");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   if (!user) return <TeacherGate title="Entre para abrir o Studio do Professor." text="Crie sua conta com e-mail e senha. Não é necessário Google." onLogin={onLogin} />;
-  if (!canTeach) return <TeacherGate title="Esta conta é de aluno." text="O Studio exige uma conta de professor validada pela Rede Lua." onLogin={onLogin} locked />;
+  if (!canTeach) return <TeacherGate title="Esta conta ainda está como aluno." text="Se você recebeu um código de professor, pode ativar o Studio nesta mesma conta." onLogin={onLogin} locked teacherCode={teacherCode} onTeacherCode={setTeacherCode} onActivate={() => activateTeacher.mutate()} activating={activateTeacher.isPending} />;
 
   const validQuestions = form.questions.every((q) => q.prompt.trim().length >= 3 && q.choices.every((choice) => choice.trim().length > 0));
   const canSave = form.title.trim().length >= 3 && validQuestions && form.questions.length > 0;
@@ -117,4 +127,4 @@ function Toggle({ label, checked, onChange }: { label: string; checked: boolean;
 function ThemeColor({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) { return <label className="theme-color"><span>{label}</span><div><input type="color" value={value} onChange={(e) => onChange(e.target.value)} /><code>{value}</code></div></label>; }
 function MoonPreview() { return <div className="moon-preview">☾</div>; }
 function Metric({ label, value, note, icon }: { label: string; value: string; note: string; icon: string }) { return <article><img src={icon} alt="" /><div><span>{label}</span><strong>{value}</strong><small>{note}</small></div></article>; }
-function TeacherGate({ title, text, onLogin, locked = false }: { title: string; text: string; onLogin: () => void; locked?: boolean }) { return <div className="page-width page-pad"><section className="teacher-gate"><div className="gate-icon">{locked ? <LockKeyhole /> : <GraduationCap />}</div><span>STUDIO DO PROFESSOR</span><h1>{title}</h1><p>{text}</p><button className="button button-primary" onClick={onLogin}>{locked ? "Trocar de conta" : "Entrar ou criar conta"} <ArrowRight /></button></section></div>; }
+function TeacherGate({ title, text, onLogin, locked = false, teacherCode = "", onTeacherCode, onActivate, activating = false }: { title: string; text: string; onLogin: () => void; locked?: boolean; teacherCode?: string; onTeacherCode?: (value: string) => void; onActivate?: () => void; activating?: boolean }) { return <div className="page-width page-pad"><section className="teacher-gate"><div className="gate-icon">{locked ? <LockKeyhole /> : <GraduationCap />}</div><span>STUDIO DO PROFESSOR</span><h1>{title}</h1><p>{text}</p>{locked && onActivate && onTeacherCode && <div className="teacher-activation"><label>Código de professor<span className="field"><GraduationCap /><input value={teacherCode} onChange={(e) => onTeacherCode(e.target.value)} placeholder="LUA-PROF-..." type="password" autoComplete="off" /></span></label><button className="button button-primary" onClick={onActivate} disabled={activating || !teacherCode.trim()}>{activating ? "Ativando…" : "Ativar conta de professor"} <ArrowRight /></button><small>Você não precisa criar outra conta.</small></div>}<button className="button button-light" onClick={onLogin}>{locked ? "Usar outra conta" : "Entrar ou criar conta"} <ArrowRight /></button></section></div>; }

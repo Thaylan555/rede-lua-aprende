@@ -1484,3 +1484,6 @@ body {
   .avatar-kit-grid > button { min-height: 82px; }
   .kit-orb { width: 36px; height: 36px; }
 }
+
+/* v6.5 — ativação de professor na própria conta */
+.teacher-activation{width:min(460px,100%);display:grid;gap:12px;margin:22px auto 10px;text-align:left}.teacher-activation label{display:grid;gap:8px;font-weight:800;color:var(--ink)}.teacher-activation .field{background:#fff}.teacher-activation .button{width:100%;justify-content:center}.teacher-activation small{text-align:center;color:var(--muted)}

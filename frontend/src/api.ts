@@ -131,19 +131,33 @@ export const api = {
   session: async (): Promise<SessionResponse> => {
     const { data, error } = await supabase.auth.getSession();
     if (error || !data.session?.user) return { authenticated: false, user: null };
+    const pendingCode = localStorage.getItem("rede-lua-pending-teacher-code");
+    if (pendingCode) {
+      try { await claimTeacher(pendingCode); localStorage.removeItem("rede-lua-pending-teacher-code"); }
+      catch { /* deixa o código salvo para o usuário tentar novamente */ }
+    }
     try { return { authenticated: true, user: await profileFor(data.session.user) }; }
     catch { return { authenticated: false, user: null }; }
   },
 
-  login: async (payload: { email: string; password: string }) => {
+  login: async (payload: { email: string; password: string; teacherCode?: string }) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email: payload.email.trim(), password: payload.password });
     if (error || !data.user) throw new ApiError(error?.message || "E-mail ou senha incorretos.", 401, "INVALID_CREDENTIALS");
-    const pendingCode = sessionStorage.getItem("rede-lua-pending-teacher-code");
+    const pendingCode = payload.teacherCode?.trim() || localStorage.getItem("rede-lua-pending-teacher-code");
     if (pendingCode) {
-      try { await claimTeacher(pendingCode); sessionStorage.removeItem("rede-lua-pending-teacher-code"); }
-      catch { /* mantém conta de aluno se o código não for válido */ }
+      await claimTeacher(pendingCode);
+      localStorage.removeItem("rede-lua-pending-teacher-code");
     }
     trackEvent("auth", "login");
+    return { ok: true as const, user: await profileFor(data.user) };
+  },
+
+  activateTeacher: async (code: string) => {
+    if (!code.trim()) throw new ApiError("Digite o código de professor.", 400);
+    await claimTeacher(code.trim());
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) throw new ApiError("Entre novamente na sua conta.", 401);
+    trackEvent("auth", "activate_teacher");
     return { ok: true as const, user: await profileFor(data.user) };
   },
 
@@ -159,7 +173,7 @@ export const api = {
 
     if (payload.role === "teacher" && payload.teacherCode) {
       if (data.session) await claimTeacher(payload.teacherCode.trim());
-      else sessionStorage.setItem("rede-lua-pending-teacher-code", payload.teacherCode.trim());
+      else localStorage.setItem("rede-lua-pending-teacher-code", payload.teacherCode.trim());
     }
     trackEvent("auth", "register", payload.role);
     return {

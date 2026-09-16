@@ -21,7 +21,7 @@ export function AuthDialog({ open, onClose, preferredRole = "student" }: { open:
   }, [open]);
 
   const login = useMutation({
-    mutationFn: () => api.login({ email: form.email, password: form.password }),
+    mutationFn: () => api.login({ email: form.email, password: form.password, teacherCode: preferredRole === "teacher" ? form.teacherCode : undefined }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["session"] });
       toast.success("Bem-vindo de volta!");
@@ -80,7 +80,7 @@ export function AuthDialog({ open, onClose, preferredRole = "student" }: { open:
             {mode === "register" && <label>Como quer ser chamado?<span className="field"><UserRound /><input value={form.displayName} onChange={(e) => setForm((v) => ({ ...v, displayName: e.target.value }))} placeholder="Seu nome" maxLength={36} autoComplete="name" /></span></label>}
             <label>E-mail<span className="field"><Mail /><input value={form.email} onChange={(e) => setForm((v) => ({ ...v, email: e.target.value }))} placeholder="voce@email.com" type="email" autoComplete="email" /></span></label>
             <label>Senha<span className="field"><LockKeyhole /><input value={form.password} onChange={(e) => setForm((v) => ({ ...v, password: e.target.value }))} placeholder={mode === "register" ? "Mínimo de 8 caracteres" : "Sua senha"} type={showPassword ? "text" : "password"} autoComplete={mode === "login" ? "current-password" : "new-password"} /><button type="button" className="password-toggle" onClick={() => setShowPassword((v) => !v)} aria-label="Mostrar ou ocultar senha">{showPassword ? <EyeOff /> : <Eye />}</button></span></label>
-            {mode === "register" && role === "teacher" && <label>Código de professor<span className="field"><GraduationCap /><input value={form.teacherCode} onChange={(e) => setForm((v) => ({ ...v, teacherCode: e.target.value }))} placeholder="Fornecido pela Rede Lua" type="password" autoComplete="off" /></span><small>Impede que qualquer pessoa crie uma conta com permissões de professor.</small></label>}
+            {((mode === "register" && role === "teacher") || (mode === "login" && preferredRole === "teacher")) && <label>Código de professor{mode === "login" && <small>Se sua conta ainda estiver como aluno, use o código para ativar o acesso de professor.</small>}<span className="field"><GraduationCap /><input value={form.teacherCode} onChange={(e) => setForm((v) => ({ ...v, teacherCode: e.target.value }))} placeholder={mode === "login" ? "Opcional se já é professor" : "Fornecido pela Rede Lua"} type="password" autoComplete="off" /></span>{mode === "register" && <small>Impede que qualquer pessoa crie uma conta com permissões de professor.</small>}</label>}
             <button className="button button-primary button-wide" disabled={pending}>{pending ? "Carregando…" : mode === "login" ? "Entrar na Rede Lua" : "Criar minha conta"}</button>
           </form>
         </div>
