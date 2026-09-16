@@ -1270,3 +1270,100 @@ body {
   .avatar-kit-grid { grid-template-columns:1fr 1fr; gap:8px; }
   .avatar-kit-grid > button { min-height:142px; }
 }
+
+/* ========================================================================
+   v6.3 — Compact Mobile Pass
+   Reduces oversized spacing/cards on phones without changing desktop.
+   ======================================================================== */
+@media (max-width: 720px) {
+  .page-width { width: min(100% - 24px, 1180px); }
+  .page-pad { padding-top: 22px; padding-bottom: 42px; }
+
+  .header-inner { height: 60px; }
+  .brand-compact img { width: 38px; height: 38px; }
+  .icon-button, .mobile-menu, .header-account .login-button { width: 38px; min-height: 38px; border-radius: 12px; }
+  .user-chip { padding: 3px 5px; }
+  .user-chip > span, .user-chip-avatar { width: 32px; height: 32px; }
+
+  .profile-page-head { gap: 12px; margin-bottom: 16px; }
+  .profile-page-head h1 { margin: 6px 0 7px; font-size: clamp(31px, 9vw, 40px); line-height: .97; }
+  .profile-page-head p { margin: 0; font-size: 14px; line-height: 1.5; }
+  .profile-role-pill { padding: 7px 11px; box-shadow: 3px 3px 0 var(--navy); font-size: 12px; }
+
+  .profile-studio-grid { gap: 14px; }
+  .profile-preview {
+    min-height: 430px;
+    max-width: 440px;
+    border-width: 2px;
+    border-radius: 24px;
+    box-shadow: 5px 5px 0 var(--navy);
+  }
+  .profile-preview.pattern-stars::before,
+  .profile-preview.pattern-grid::before { height: 155px; }
+  .profile-cover { height: 150px; padding: 14px 16px; font-size: 8px; }
+  .profile-avatar-shell {
+    width: 112px;
+    height: 112px;
+    margin-top: -60px;
+    border-width: 3px;
+    border-radius: 32px;
+    box-shadow: 4px 4px 0 var(--navy);
+  }
+  .profile-avatar-shell .lua-avatar,
+  .profile-avatar-shell .lua-avatar-base { border-radius: 28px; }
+  .profile-preview-copy { padding: 13px 18px 10px; }
+  .profile-preview-copy > span { padding: 4px 7px; font-size: 8px; }
+  .profile-preview-copy h2 { margin: 7px 0 5px; font-size: 23px; }
+  .profile-preview-copy p { min-height: 32px; font-size: 11px; line-height: 1.4; }
+  .profile-stat-row { margin: 3px 14px 11px; border-radius: 14px; }
+  .profile-stat-row div { padding: 9px 6px; }
+  .profile-stat-row strong { font-size: 16px; }
+  .profile-stat-row span { font-size: 8px; }
+  .profile-subject-chips { gap: 5px; padding: 0 15px 17px; }
+  .profile-subject-chips span { padding: 5px 8px; font-size: 9px; }
+
+  .profile-editor-stack { gap: 12px; }
+  .profile-editor-card {
+    padding: 14px;
+    border-radius: 20px;
+    border-width: 1.5px;
+    box-shadow: 3px 4px 0 rgba(7,29,73,.9);
+  }
+  .profile-editor-card input:not([type="range"]):not([type="color"]),
+  .profile-editor-card select,
+  .profile-editor-card textarea { padding: 9px 10px; border-radius: 11px; }
+  .profile-editor-card textarea { min-height: 74px; }
+  .profile-save { min-height: 46px; }
+
+  .avatar-style-grid { gap: 7px; margin-bottom: 11px; }
+  .avatar-style-grid button { min-height: 72px; padding: 10px; border-radius: 13px; }
+  .avatar-option-grid { gap: 7px; margin-top: 9px; }
+  .avatar-option-grid label { padding: 9px; border-radius: 12px; }
+
+  .avatar-kit-grid { gap: 7px; }
+  .avatar-kit-grid > button { min-height: 102px; padding: 8px; border-radius: 15px; }
+  .avatar-kit-grid strong { margin-top: 6px; font-size: 12px; }
+  .avatar-kit-grid small { margin-top: 3px; font-size: 9px; }
+  .kit-orb { width: 48px; height: 48px; border-radius: 14px; box-shadow: 2px 2px 0 rgba(7,29,73,.9); }
+
+  .gear-intro { margin-bottom: 11px; font-size: 11px; }
+  .gear-picker { padding: 10px 0; }
+  .gear-picker > strong { margin-bottom: 7px; }
+  .gear-picker button { min-width: 84px; padding: 8px; gap: 5px; border-radius: 12px; font-size: 9px; }
+  .gear-swatch { width: 27px; height: 27px; border-radius: 8px; }
+  .avatar-detail-drawer summary > span { font-size: 15px; }
+  .avatar-detail-content { margin-top: 12px; padding-top: 12px; }
+
+  .button { min-height: 42px; padding-inline: 14px; }
+  .page-intro h1 { font-size: 34px; }
+}
+
+@media (max-width: 430px) {
+  .page-width { width: calc(100% - 20px); }
+  .profile-page-head h1 { font-size: 31px; }
+  .profile-preview { min-height: 410px; }
+  .profile-cover { height: 142px; }
+  .profile-avatar-shell { width: 106px; height: 106px; margin-top: -57px; }
+  .avatar-kit-grid > button { min-height: 96px; }
+  .kit-orb { width: 44px; height: 44px; }
+}
