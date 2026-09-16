@@ -1367,3 +1367,120 @@ body {
   .avatar-kit-grid > button { min-height: 96px; }
   .kit-orb { width: 44px; height: 44px; }
 }
+
+
+/* ========================================================================
+   v6.4 — Tight Mobile Profile
+   Aggressive compact pass for phone screens.
+   ======================================================================== */
+@media (max-width: 720px) {
+  .profile-view.page-pad { padding-top: 14px; padding-bottom: 30px; }
+
+  .profile-page-head { margin-bottom: 10px; gap: 8px; }
+  .profile-page-head .eyebrow { font-size: 9px; padding: 5px 8px; }
+  .profile-page-head h1 { font-size: 27px; line-height: .98; margin: 5px 0 5px; letter-spacing: -.045em; }
+  .profile-page-head p { max-width: 520px; font-size: 12px; line-height: 1.4; }
+  .profile-role-pill { padding: 5px 9px; font-size: 10px; box-shadow: 2px 2px 0 var(--navy); }
+  .profile-role-pill svg { width: 14px; height: 14px; }
+
+  .profile-studio-grid { gap: 10px; }
+  .profile-preview {
+    min-height: 0;
+    max-width: 100%;
+    border-radius: 20px;
+    box-shadow: 4px 4px 0 var(--navy);
+  }
+  .profile-cover { height: 88px; padding: 10px 12px; font-size: 7px; }
+  .profile-preview.pattern-stars::before,
+  .profile-preview.pattern-grid::before { height: 92px; }
+  .profile-preview.pattern-orbit::before { width: 190px; height: 190px; top: -100px; right: -62px; }
+  .profile-avatar-shell {
+    width: 78px;
+    height: 78px;
+    margin-top: -40px;
+    border-width: 2px;
+    border-radius: 22px;
+    box-shadow: 3px 3px 0 var(--navy);
+  }
+  .profile-avatar-shell .lua-avatar,
+  .profile-avatar-shell .lua-avatar-base { border-radius: 19px; }
+  .profile-preview-copy { padding: 8px 12px 5px; }
+  .profile-preview-copy > span { padding: 3px 6px; font-size: 7px; }
+  .profile-preview-copy h2 { margin: 5px 0 3px; font-size: 18px; }
+  .profile-preview-copy p {
+    min-height: 0;
+    margin: 0 auto;
+    max-width: 92%;
+    font-size: 9px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .profile-stat-row { margin: 5px 10px 7px; border-radius: 11px; }
+  .profile-stat-row div { padding: 6px 4px; }
+  .profile-stat-row strong { font-size: 13px; }
+  .profile-stat-row span { font-size: 6px; letter-spacing: .07em; }
+  .profile-subject-chips { gap: 4px; padding: 0 10px 10px; }
+  .profile-subject-chips span { padding: 4px 6px; font-size: 7px; }
+
+  .profile-editor-stack { gap: 9px; }
+  .profile-editor-card { padding: 11px; border-radius: 16px; box-shadow: 2px 3px 0 rgba(7,29,73,.9); }
+  .panel-heading { margin-bottom: 9px; }
+  .panel-heading span { font-size: 8px; }
+  .panel-heading h2 { font-size: 18px; line-height: 1.05; }
+  .panel-heading > svg { width: 24px; height: 24px; }
+  .profile-fields, .profile-fields.two { gap: 7px; }
+  .profile-editor-card label { font-size: 9px; }
+  .profile-editor-card input:not([type="range"]):not([type="color"]),
+  .profile-editor-card select,
+  .profile-editor-card textarea { padding: 7px 8px; border-radius: 9px; font-size: 12px; }
+  .profile-editor-card textarea { min-height: 58px; }
+  .visibility-row { gap: 6px; margin-top: 8px; }
+  .visibility-row label { padding: 6px 8px; font-size: 9px; }
+
+  .avatar-kit-grid { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+  .avatar-kit-grid > button { min-height: 0; padding: 7px; border-radius: 12px; }
+  .avatar-kit-grid strong { margin-top: 4px; font-size: 10px; }
+  .avatar-kit-grid small { display: none; }
+  .avatar-kit-grid > button > svg { width: 13px; top: 6px; right: 6px; }
+  .kit-orb { width: 40px; height: 40px; border-radius: 11px; }
+
+  .avatar-style-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; margin-bottom: 8px; }
+  .avatar-style-grid button { min-height: 54px; padding: 8px; border-radius: 11px; }
+  .avatar-style-grid button strong { font-size: 11px; }
+  .avatar-style-grid button small { font-size: 8px; margin-top: 2px; line-height: 1.2; }
+  .avatar-random-button { min-height: 36px; font-size: 11px; }
+
+  .gear-intro { margin-bottom: 8px; font-size: 10px; line-height: 1.4; }
+  .gear-picker { padding: 7px 0; }
+  .gear-picker > strong { margin-bottom: 5px; font-size: 9px; }
+  .gear-picker > div { gap: 5px; padding-bottom: 4px; }
+  .gear-picker button { min-width: 68px; padding: 6px; gap: 4px; border-radius: 10px; font-size: 8px; }
+  .gear-swatch { width: 23px; height: 23px; border-radius: 7px; }
+
+  .avatar-detail-drawer summary { gap: 6px; }
+  .avatar-detail-drawer summary > span { font-size: 13px; }
+  .avatar-detail-drawer summary > small { font-size: 9px; }
+  .avatar-detail-content { margin-top: 9px; padding-top: 9px; }
+  .avatar-option-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .avatar-option-grid label { padding: 7px; }
+
+  .color-editor-grid { grid-template-columns: repeat(2,1fr); gap: 6px; }
+  .color-field > div { grid-template-columns: 35px 1fr; gap: 5px; }
+  .color-field input[type="color"] { width: 35px; height: 34px; }
+  .pattern-picker, .subject-picker { gap: 5px; margin: 8px 0 10px; }
+  .pattern-picker button, .subject-picker button { padding: 5px 7px; font-size: 8px; }
+  .profile-save { min-height: 40px; font-size: 12px; }
+}
+
+@media (max-width: 430px) {
+  .profile-page-head h1 { font-size: 25px; }
+  .profile-page-head p { font-size: 11px; }
+  .profile-cover { height: 82px; }
+  .profile-avatar-shell { width: 74px; height: 74px; margin-top: -38px; }
+  .avatar-kit-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .avatar-kit-grid > button { min-height: 82px; }
+  .kit-orb { width: 36px; height: 36px; }
+}

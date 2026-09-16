@@ -56,7 +56,7 @@ export function ProfileView({ user, onLogin }: { user: SessionUser | null; onLog
   };
 
   return <div className="page-width page-pad profile-view">
-    <header className="profile-page-head"><div><span className="eyebrow"><Sparkles size={16} /> Mega Perfil</span><h1>Mais personagem, menos cadastro.</h1><p>Escolha um estilo pronto ou misture cabelo, roupa, robô, tapa-olho, headset, visor, efeitos e cores até ficar com a sua vibe.</p></div><div className="profile-role-pill"><ShieldCheck /><span>{roleLabel}</span></div></header>
+    <header className="profile-page-head"><div><span className="eyebrow"><Sparkles size={16} /> Mega Perfil</span><h1>Seu perfil, sua vibe.</h1><p>Escolha um estilo, acessórios e cores. Misture tudo do seu jeito.</p></div><div className="profile-role-pill"><ShieldCheck /><span>{roleLabel}</span></div></header>
 
     <section className="profile-studio-grid">
       <aside className={`profile-preview pattern-${profileTheme.pattern}`} style={{ ["--profile-bg" as string]: profileTheme.background, ["--profile-surface" as string]: profileTheme.surface, ["--profile-accent" as string]: profileTheme.accent, ["--profile-card" as string]: profileTheme.card }}>
