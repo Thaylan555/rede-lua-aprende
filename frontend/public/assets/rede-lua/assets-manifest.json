@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "brand": "/assets/rede-lua/brand/logo-transparent.png",
+  "userSuppliedPacks": [
+    "199756-youtube-stream-emojigg-pack.zip",
+    "331989-fakes-gifs-emojigg-pack.zip"
+  ],
+  "classroomReactionAssets": [
+    "1211-pepeheart.png",
+    "60369-whaat.png",
+    "631592-satisfiedbob.png",
+    "600559-glasses.png",
+    "68986-soldierhamster.png",
+    "486800-plotting.png",
+    "5577_Pusheen_popcorn.png",
+    "60797-shiba.png"
+  ],
+  "interfaceIcons": 10,
+  "note": "A interface usa uma seleção menor do pack comunitário para manter a experiência de sala de aula mais limpa."
+}

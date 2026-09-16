@@ -1,0 +1,27 @@
+{
+  "name": "rede-lua-educacao-pages",
+  "version": "6.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "npm run build && wrangler pages dev frontend/dist --compatibility-date=2026-09-15",
+    "build": "npm --workspace frontend run build",
+    "typecheck": "npm --workspace frontend run typecheck && tsc -p tsconfig.functions.json --noEmit",
+    "deploy": "npm run build && wrangler pages deploy frontend/dist"
+  },
+  "dependencies": {
+    "hono": "^4.9.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260515.1",
+    "typescript": "^5.9.2",
+    "wrangler": "^4.92.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

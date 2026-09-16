@@ -1,0 +1,6 @@
+name = "rede-lua-educacao"
+compatibility_date = "2026-09-15"
+pages_build_output_dir = "frontend/dist"
+
+# LuaCore usa Supabase/PostgreSQL para busca, recomendação e analytics.
+# Configure SUPABASE_URL e SUPABASE_PUBLISHABLE_KEY no ambiente do Pages.

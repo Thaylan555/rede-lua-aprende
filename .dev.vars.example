@@ -1,0 +1,5 @@
+# Cloudflare Pages Functions
+# LuaCore usa o Supabase diretamente para busca, recomendação e analytics.
+SUPABASE_URL=https://wpoftenqaeoliifrjsdr.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_SUBSTITUA_PELA_CHAVE_PUBLICAVEL
+VITE_DICEBEAR_API_URL=https://api.dicebear.com/10.x

@@ -1,0 +1,66 @@
+# Rede Lua na Educação — v6 Mega Perfil + Quiz Studio
+
+A v6 transforma a plataforma em um ecossistema mais personalizável para alunos e professores, mantendo o **Supabase como fonte principal de dados** e o **LuaCore** como núcleo pedagógico.
+
+## O que entrou na v6
+
+- **Mega Perfil** para aluno/professor: nome, título, bio, matérias favoritas, cartão, cores, padrão e visibilidade.
+- **Avatar Studio com DiceBear**: 5 estilos disponíveis e opções descobertas dinamicamente via `options.json` (cabelo, óculos, olhos, acessórios, cores e outras peças conforme o estilo).
+- **DiceBear self-host opcional** com Docker (`docker-compose.avatar.yml`).
+- **Quiz Studio**: temas, paletas, padrão visual, formato dos botões, tipografia, logo próprio e mídia nas perguntas.
+- **4 experiências de jogo**: Quiz Clássico, Corrida Lunar, Caça às Estrelas e Modo Foco.
+- **Cronômetro autoritativo no servidor** e bônus de velocidade opcional na Corrida Lunar.
+- **Verdadeiro/Falso** além de múltipla escolha.
+- **Dicas e imagens** nas perguntas.
+- **Supabase Storage** para logos e imagens de atividade (`rede-lua-assets`).
+- Forja Lunar, Radar de Aprendizagem, Constelação do Aluno, busca nativa e recomendações continuam no LuaCore.
+
+## Arquitetura
+
+```text
+Cloudflare Pages (React/Vite)
+        │
+        ├── Supabase Auth
+        ├── Supabase Postgres + RLS + RPC
+        ├── Supabase Storage (logos/imagens de quiz)
+        └── DiceBear HTTP API (pública ou self-host)
+
+LuaCore no Postgres
+  ├── Busca Lunar (FTS + pg_trgm)
+  ├── domínio e afinidade
+  ├── recomendações
+  ├── Forja Lunar
+  ├── Radar de Aprendizagem
+  └── Constelação do Aluno
+```
+
+## Desenvolvimento
+
+```bash
+npm install
+npm run build
+```
+
+Variáveis do frontend:
+
+```env
+VITE_SUPABASE_URL=https://SEU-PROJETO.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+VITE_DICEBEAR_API_URL=https://api.dicebear.com/10.x
+```
+
+Para self-host do Avatar Studio:
+
+```bash
+docker compose -f docker-compose.avatar.yml up -d
+```
+
+Depois aponte `VITE_DICEBEAR_API_URL` para seu domínio/porta DiceBear terminando em `/10.x`.
+
+## Banco
+
+A migration principal da v6 está em:
+
+`supabase/migrations/20260916_rede_lua_megaprofiles_quiz_studio.sql`
+
+Ela adiciona configuração de perfil, configuração visual de atividades, novos campos de pergunta, Storage e RPCs da v6.
