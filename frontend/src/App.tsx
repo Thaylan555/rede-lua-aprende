@@ -37,7 +37,7 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [preferredRole, setPreferredRole] = useState<Exclude<Role, "admin">>("student");
-  const [gameCode, setGameCode] = useState("");
+  const [gameCode, setGameCode] = useState(() => { const q = location.hash.split("?")[1] || ""; return (new URLSearchParams(q).get("code") || "").toUpperCase(); });
   const session = useQuery({ queryKey: ["session"], queryFn: api.session, staleTime: 60_000, retry: 1 });
   const user = session.data?.user || null;
 
@@ -53,7 +53,7 @@ export default function App() {
 
   useEffect(() => {
     initCoreAnalytics();
-    const onHash = () => setViewState(getViewFromHash());
+    const onHash = () => { setViewState(getViewFromHash()); const q = location.hash.split("?")[1] || ""; const code = new URLSearchParams(q).get("code"); if (code) setGameCode(code.toUpperCase()); };
     addEventListener("hashchange", onHash);
     return () => removeEventListener("hashchange", onHash);
   }, []);

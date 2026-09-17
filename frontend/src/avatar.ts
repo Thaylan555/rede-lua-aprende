@@ -8,6 +8,10 @@ export const AVATAR_STYLES: Array<{ id: AvatarStyle; label: string; note: string
   { id: "notionists", label: "Sketch", note: "Ilustração limpa com bastante personalidade." },
   { id: "bottts", label: "Robô", note: "Robôs completos com antenas, peças e carinhas." },
   { id: "pixel-art", label: "Pixel", note: "Visual de game retrô em estilo 8-bit." },
+  { id: "big-smile", label: "Big Smile", note: "Cartoon alegre com cabelo, roupa e sorrisos grandes." },
+  { id: "fun-emoji", label: "Emoji", note: "Carinhas bem expressivas para um perfil mais leve." },
+  { id: "croodles", label: "Doodle", note: "Desenho rabiscado com cara de caderno e muita personalidade." },
+  { id: "micah", label: "Creator", note: "Retrato moderno com roupa, cabelo e cores fortes." },
 ];
 
 export type AvatarKit = {
@@ -26,22 +30,32 @@ export const AVATAR_KITS: AvatarKit[] = [
   { id: "mago-cosmico", label: "Mago Cósmico", tagline: "Um visual mágico sem ficar infantil.", style: "adventurer", config: { _luaHead: "wizard-hat", _luaFace: "star-glasses", _luaAura: "cosmic", _luaFrame: "cosmic" }, theme: { accent: "#ffe066", surface: "#5938a9", background: "#1b1042", card: "#fffaff", pattern: "orbit" } },
   { id: "street-lunar", label: "Street Lunar", tagline: "Boné, visor e uma vibe mais teen.", style: "avataaars", config: { _luaHead: "street-cap", _luaFace: "neon-visor", _luaAura: "neon", _luaFrame: "street" }, theme: { accent: "#65e9ff", surface: "#155bd7", background: "#071c45", card: "#ffffff", pattern: "plain" } },
   { id: "agente-orbita", label: "Agente Órbita", tagline: "Máscara, tecnologia e perfil misterioso.", style: "notionists", config: { _luaHead: "none", _luaFace: "mask", _luaAura: "cosmic", _luaFrame: "tech" }, theme: { accent: "#a477ff", surface: "#172650", background: "#080d20", card: "#fbfbff", pattern: "orbit" } },
+  { id: "creator-pop", label: "Creator Pop", tagline: "Cartoon forte, divertido e com cara de criador.", style: "big-smile", config: { _luaHead: "headset", _luaFace: "none", _luaAura: "stars", _luaFrame: "street" }, theme: { accent: "#ff5d8f", surface: "#2648a8", background: "#111a44", card: "#fffaf5", pattern: "stars" } },
+  { id: "caderno-vivo", label: "Caderno Vivo", tagline: "Doodle criativo para quem gosta de desenhar e inventar.", style: "croodles", config: { _luaHead: "street-cap", _luaFace: "star-glasses", _luaAura: "pixels", _luaFrame: "arcade" }, theme: { accent: "#ffd54a", surface: "#1f6d5b", background: "#0c2d2a", card: "#fffdf1", pattern: "grid" } },
 ];
 
 export const LUA_GEAR = {
   head: [
-    ["none", "Sem item"], ["pirate-hat", "Chapéu pirata"], ["headset", "Headset gamer"], ["wizard-hat", "Chapéu de mago"], ["street-cap", "Boné street"], ["robot-antenna", "Antena robô"],
+    ["none", "Sem item"], ["pirate-hat", "Chapéu pirata"], ["headset", "Headset gamer"], ["wizard-hat", "Chapéu de mago"], ["street-cap", "Boné street"], ["robot-antenna", "Antena robô"], ["comet-crown", "Coroa Cometa"],
   ],
   face: [
-    ["none", "Sem item"], ["eyepatch", "Tapa-olho"], ["neon-visor", "Visor neon"], ["star-glasses", "Óculos estrela"], ["mask", "Máscara tech"],
+    ["none", "Sem item"], ["eyepatch", "Tapa-olho"], ["neon-visor", "Visor neon"], ["star-glasses", "Óculos estrela"], ["mask", "Máscara tech"], ["prism-glasses", "Óculos Prisma"],
   ],
   aura: [
-    ["none", "Sem efeito"], ["stars", "Estrelas"], ["neon", "Neon"], ["pixels", "Pixels"], ["cosmic", "Órbita cósmica"],
+    ["none", "Sem efeito"], ["stars", "Estrelas"], ["neon", "Neon"], ["pixels", "Pixels"], ["cosmic", "Órbita cósmica"], ["comet", "Rastro de Cometa"],
   ],
   frame: [
-    ["none", "Clássica"], ["pirate", "Pirata"], ["tech", "Tech"], ["arcade", "Arcade"], ["cosmic", "Cósmica"], ["street", "Street"],
+    ["none", "Clássica"], ["pirate", "Pirata"], ["tech", "Tech"], ["arcade", "Arcade"], ["cosmic", "Cósmica"], ["street", "Street"], ["quasar", "Quasar"],
   ],
 } as const;
+
+export const PROFILE_COSMETICS = [
+  { id:"head-comet-crown", label:"Coroa Cometa", note:"Uma coroa espacial para looks especiais.", cost:60, level:3, kind:"head", value:"comet-crown" },
+  { id:"face-prism-glasses", label:"Óculos Prisma", note:"Lentes coloridas com vibe futurista.", cost:45, level:2, kind:"face", value:"prism-glasses" },
+  { id:"aura-comet", label:"Rastro de Cometa", note:"Partículas passando atrás do avatar.", cost:35, level:2, kind:"aura", value:"comet" },
+  { id:"frame-quasar", label:"Moldura Quasar", note:"Uma moldura brilhante para destacar o cartão.", cost:50, level:3, kind:"frame", value:"quasar" },
+  { id:"theme-aurora", label:"Tema Aurora", note:"Paleta especial verde, azul e dourado.", cost:80, level:4, kind:"theme", value:"aurora" },
+] as const;
 
 const configuredBase = (import.meta.env.VITE_DICEBEAR_API_URL || "https://api.dicebear.com/10.x").replace(/\/$/, "");
 export const DICEBEAR_API_BASE = configuredBase;

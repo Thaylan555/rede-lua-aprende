@@ -84,6 +84,9 @@ export function GameView({ initialCode = "" }: { initialCode?: string }) {
   const timePercent = Math.max(0, Math.min(100, (timeLeft / limit) * 100));
   const timeExpired = game.gameConfig.enforceTimer && timeLeft <= 0;
   const stars = Math.max(0, Math.floor(game.participant.score / 100));
+  const templatePreset = game.theme.preset || "";
+  const bossEnergy = Math.max(0, 100 - Math.round((game.currentQuestion / Math.max(1, game.questionCount)) * 100));
+  const treasureStep = Math.min(game.questionCount, game.currentQuestion + 1);
   const stageStyle = {
     ["--game-primary" as string]: theme.primary,
     ["--game-secondary" as string]: theme.secondary,
@@ -101,8 +104,8 @@ export function GameView({ initialCode = "" }: { initialCode?: string }) {
     {game.status === "running" && game.question && <main className="page-width question-stage branded-question-stage">
       <div className="question-meta"><span>{game.gameConfig.showProgress ? `PERGUNTA ${game.currentQuestion + 1} DE ${game.questionCount}` : modeLabel(game.experienceMode).toUpperCase()}</span><div className={timeLeft <= 5 ? "urgent" : ""}><Clock3 /> {game.gameConfig.enforceTimer ? `${Math.ceil(timeLeft)}s` : "ao vivo"}</div></div>
       {game.gameConfig.enforceTimer && <div className="game-timer-track"><i style={{ width: `${timePercent}%` }} /></div>}
-      {game.experienceMode === "lunar_rush" && <div className="mode-banner rush"><Zap /><span>Corrida Lunar: responda cedo para ganhar bônus de velocidade.</span></div>}
-      {game.experienceMode === "star_hunt" && <div className="mode-banner stars"><Star /><span>{stars} estrela{stars === 1 ? "" : "s"} coletada{stars === 1 ? "" : "s"} nesta partida.</span></div>}
+      {templatePreset === "chefao" ? <div className="boss-battle-panel"><div><span>👾 CHEFÃO DA TURMA</span><strong>{bossEnergy}% de energia</strong></div><div className="boss-health"><i style={{ width:`${bossEnergy}%` }} /></div><small>Cada pergunta vencida empurra a turma mais perto da vitória.</small></div> : game.experienceMode === "lunar_rush" && <div className="mode-banner rush"><Zap /><span>Corrida Lunar: responda cedo para ganhar bônus de velocidade.</span></div>}
+      {templatePreset === "tesouro" ? <div className="treasure-progress"><span>🗺️ PISTA {treasureStep}/{game.questionCount}</span><div>{Array.from({length:Math.min(game.questionCount,8)},(_,i)=><i key={i} className={i < Math.ceil((treasureStep / Math.max(1,game.questionCount))*Math.min(game.questionCount,8)) ? "found" : ""} />)}</div><small>Responda para revelar o próximo pedaço do mapa.</small></div> : game.experienceMode === "star_hunt" && <div className="mode-banner stars"><Star /><span>{stars} estrela{stars === 1 ? "" : "s"} coletada{stars === 1 ? "" : "s"} nesta partida.</span></div>}
       {game.question.mediaUrl && <div className="question-media"><img src={game.question.mediaUrl} alt="Imagem da pergunta" /></div>}
       <h1>{game.question.prompt}</h1>
       {game.question.hint && !feedback && <div className="hint-zone"><button onClick={() => setHintOpen((value) => !value)}><HelpCircle /> {hintOpen ? "Ocultar dica" : "Abrir dica"}</button>{hintOpen && <p>{game.question.hint}</p>}</div>}
@@ -110,7 +113,7 @@ export function GameView({ initialCode = "" }: { initialCode?: string }) {
       {game.gameConfig.showLeaderboard && !feedback && game.experienceMode !== "focus" && <div className="question-leader-strip">{game.leaderboard.slice(0, 3).map((p, i) => <span key={p.id}><b>{i + 1}</b>{p.displayName}<em>{p.score}</em></span>)}</div>}
     </main>}
 
-    {game.status === "finished" && <main className="page-width game-center"><section className="result-card branded-result"><Medal /><span>PARTIDA FINALIZADA</span><h1>Missão concluída.</h1><p>Você terminou com <strong>{game.participant.score} pontos</strong>.</p>{game.experienceMode === "star_hunt" && <div className="final-stars"><Star /> {stars} estrelas coletadas</div>}<div className="leaderboard-final">{game.leaderboard.map((p, i) => <div className={p.id === game.participant.id ? "me" : ""} key={p.id}><b>{i + 1}</b><span>{p.displayName}</span><strong>{p.score} pts</strong></div>)}</div><button className="button button-primary" onClick={() => { sessionStorage.removeItem(`rede-lua-game:${normalizedCode}`); setParticipant(null); setCode(""); }}>Entrar em outra partida</button></section></main>}
+    {game.status === "finished" && <main className="page-width game-center"><section className="result-card branded-result"><Medal /><span>PARTIDA FINALIZADA</span><h1>{templatePreset === "chefao" ? "Chefão derrotado!" : templatePreset === "tesouro" ? "Tesouro encontrado!" : "Missão concluída."}</h1><p>Você terminou com <strong>{game.participant.score} pontos</strong>.</p>{game.experienceMode === "star_hunt" && <div className="final-stars"><Star /> {stars} estrelas coletadas</div>}<div className="leaderboard-final">{game.leaderboard.map((p, i) => <div className={p.id === game.participant.id ? "me" : ""} key={p.id}><b>{i + 1}</b><span>{p.displayName}</span><strong>{p.score} pts</strong></div>)}</div><button className="button button-primary" onClick={() => { sessionStorage.removeItem(`rede-lua-game:${normalizedCode}`); setParticipant(null); setCode(""); }}>Entrar em outra partida</button></section></main>}
   </div>;
 }
 

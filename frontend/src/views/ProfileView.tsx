@@ -4,16 +4,23 @@ import { DragDropProvider } from "@dnd-kit/react";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import BoringAvatar from "boring-avatars";
 import confetti from "canvas-confetti";
-import { Bot, Check, Dices, Gamepad2, Glasses, GripVertical, LoaderCircle, MoonStar, Palette, Save, ShieldCheck, Sparkles, UserRound, WandSparkles } from "lucide-react";
+import { Bot, Check, Coins, Dices, Gamepad2, Glasses, GripVertical, LoaderCircle, LockKeyhole, MoonStar, Palette, Save, ShieldCheck, Sparkles, UserRound, WandSparkles } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "../api";
-import { AVATAR_KITS, AVATAR_STYLES, humanizeAvatarOption, humanizeAvatarValue, keepLuaGear, loadAvatarOptions, LUA_GEAR, usefulAvatarOptions } from "../avatar";
+import { AVATAR_KITS, AVATAR_STYLES, humanizeAvatarOption, humanizeAvatarValue, keepLuaGear, loadAvatarOptions, LUA_GEAR, PROFILE_COSMETICS, usefulAvatarOptions } from "../avatar";
 import { AvatarVisual } from "../components/AvatarVisual";
 import { profileTextIssue } from "../moderation";
 import { makeProfileCodename, normalizeWidgetOrder, PROFILE_WIDGET_META, type ProfileWidgetId } from "../profileFun";
 import type { AvatarConfig, AvatarStyle, ProfileTheme, SessionUser } from "../types";
 
 const subjects = ["Matemática", "Português", "Ciências", "História", "Geografia", "Inglês", "Física", "Química", "Biologia", "Artes"];
+const PROFILE_THEME_PRESETS: Array<{ id:string; label:string; theme:ProfileTheme }> = [
+  { id:"lunar", label:"Lunar", theme:{ accent:"#ffbd2e", surface:"#0b2d68", background:"#071c45", card:"#ffffff", pattern:"stars" } },
+  { id:"arcade", label:"Arcade", theme:{ accent:"#63e7ff", surface:"#6b43d6", background:"#171032", card:"#fffdf7", pattern:"grid" } },
+  { id:"pop", label:"Pop", theme:{ accent:"#ff5d8f", surface:"#3049b2", background:"#151b49", card:"#fff9f4", pattern:"stars" } },
+  { id:"caderno", label:"Caderno", theme:{ accent:"#ffca44", surface:"#2a5c9f", background:"#f5efe2", card:"#fffdf7", pattern:"grid" } },
+  { id:"night", label:"Night", theme:{ accent:"#a982ff", surface:"#202c58", background:"#070b1f", card:"#f7f7ff", pattern:"orbit" } },
+];
 
 function randomSeed() {
   return `lua-${crypto.randomUUID().replace(/-/g, "").slice(0, 18)}`;
@@ -55,6 +62,17 @@ export function ProfileView({ user, onLogin }: { user: SessionUser | null; onLog
   }, [user?.id, user?.level]);
 
   const avatarOptions = useQuery({ queryKey: ["dicebear-options", avatarStyle], queryFn: () => loadAvatarOptions(avatarStyle), staleTime: 60 * 60 * 1000, retry: 1 });
+  const cosmetics = useQuery({ queryKey: ["profile-cosmetics", user?.id], queryFn: api.myCosmetics, enabled: Boolean(user), staleTime: 15_000, retry: 1 });
+  const unlockCosmetic = useMutation({
+    mutationFn: (itemId: string) => api.unlockCosmetic(itemId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey:["profile-cosmetics"] });
+      await queryClient.invalidateQueries({ queryKey:["session"] });
+      toast.success("Item desbloqueado! Agora ele é seu ✨");
+      celebrate();
+    },
+    onError: (error: Error) => toast.error(error.message === "COSMETIC_LEVEL_REQUIRED" ? "Você ainda não chegou ao nível necessário para esse item." : error.message === "NOT_ENOUGH_MOON_COINS" ? "Faltam Luas para desbloquear esse item." : error.message),
+  });
   const curatedOptions = useMemo(() => avatarOptions.data ? usefulAvatarOptions(avatarOptions.data) : [], [avatarOptions.data]);
   const widgetOrder = normalizeWidgetOrder(avatarConfig._luaWidgets);
 
@@ -92,8 +110,21 @@ export function ProfileView({ user, onLogin }: { user: SessionUser | null; onLog
     setProfileTheme(kit.theme);
   };
 
+  const cosmeticUnlocks = new Set(cosmetics.data?.unlocks || []);
+  const premiumValues = new Set<string>(PROFILE_COSMETICS.filter((item) => item.kind !== "theme").map((item) => item.value));
+  const freeGear = <T extends readonly (readonly [string, string])[]>(items: T) => items.filter(([id]) => !premiumValues.has(id));
+  const applyCosmetic = (item: (typeof PROFILE_COSMETICS)[number]) => {
+    if (!cosmeticUnlocks.has(item.id)) return;
+    if (item.kind === "head") setLua("_luaHead", item.value);
+    if (item.kind === "face") setLua("_luaFace", item.value);
+    if (item.kind === "aura") setLua("_luaAura", item.value);
+    if (item.kind === "frame") setLua("_luaFrame", item.value);
+    if (item.kind === "theme") setProfileTheme({ accent:"#ffd95c", surface:"#167b69", background:"#092b2a", card:"#fffdf1", pattern:"orbit" });
+    toast.success(`${item.label} aplicado ao perfil.`);
+  };
+
   const renderProfileWidget = (id: ProfileWidgetId) => {
-    if (id === "stats") return <div key={id} className="profile-stat-row profile-widget"><div><strong>{user.level}</strong><span>Nível</span></div><div><strong>{user.xp.toLocaleString("pt-BR")}</strong><span>XP</span></div></div>;
+    if (id === "stats") return <div key={id} className="profile-stat-row profile-widget"><div><strong>{user.level}</strong><span>Nível</span></div><div><strong>{user.xp.toLocaleString("pt-BR")}</strong><span>XP</span></div><div><strong>{user.moonCoins.toLocaleString("pt-BR")}</strong><span>Luas</span></div></div>;
     if (id === "streak") return <div key={id} className="profile-streak-widget profile-widget"><span>🔥</span><div><strong>{user.streakDays} {user.streakDays === 1 ? "dia" : "dias"}</strong><small>de sequência</small></div></div>;
     if (id === "subjects") return <div key={id} className="profile-subject-chips profile-widget">{favoriteSubjects.length ? favoriteSubjects.slice(0, 4).map((subject) => <span key={subject}>{subject}</span>) : <span>Escolha matérias favoritas</span>}</div>;
     return <div key={id} className="profile-signature-widget profile-widget"><BoringAvatar size={44} name={`${displayName}-${user.id}`} variant="bauhaus" colors={[profileTheme.accent, profileTheme.surface, profileTheme.background, "#ffffff", "#2e78df"]} /><div><strong>Seu selo orbital</strong><small>Único para este perfil</small></div></div>;
@@ -142,17 +173,33 @@ export function ProfileView({ user, onLogin }: { user: SessionUser | null; onLog
 
         <section className="profile-editor-card avatar-maker">
           <div className="panel-heading"><div><span>PERSONAGEM</span><h2>Base do seu avatar</h2></div><Bot /></div>
-          <div className="avatar-style-grid">{AVATAR_STYLES.map((style) => <button key={style.id} className={avatarStyle === style.id ? "active" : ""} onClick={() => { setAvatarStyle(style.id); setAvatarConfig((current) => ({ ...keepLuaGear(current), _luaWidgets: normalizeWidgetOrder(current._luaWidgets), _luaLook: "custom" })); }}><strong>{style.label}</strong><small>{style.note}</small>{avatarStyle === style.id && <Check />}</button>)}</div>
+          <div className="avatar-style-grid avatar-style-visual-grid">{AVATAR_STYLES.map((style) => <button key={style.id} className={avatarStyle === style.id ? "active" : ""} onClick={() => { setAvatarStyle(style.id); setAvatarConfig((current) => ({ ...keepLuaGear(current), _luaWidgets: normalizeWidgetOrder(current._luaWidgets), _luaLook: "custom" })); }}><span className="avatar-style-thumb"><AvatarVisual style={style.id} seed={`style-${style.id}`} config={{}} size={120} compact /></span><span className="avatar-style-copy"><strong>{style.label}</strong><small>{style.note}</small></span>{avatarStyle === style.id && <Check />}</button>)}</div>
           <button className="button button-ghost avatar-random-button" onClick={() => { setAvatarSeed(randomSeed()); setAvatarConfig((current) => ({ ...keepLuaGear(current), _luaWidgets: normalizeWidgetOrder(current._luaWidgets), _luaLook: "custom" })); }}><Dices /> Outra combinação</button>
         </section>
 
         <section className="profile-editor-card lua-gear-card">
           <div className="panel-heading"><div><span>ACESSÓRIOS LUA</span><h2>Agora deixa ele divertido</h2></div><Gamepad2 /></div>
           <p className="gear-intro">Esses itens ficam por cima do avatar e funcionam até nos estilos que não trazem o acessório de fábrica.</p>
-          <GearPicker title="Na cabeça" value={luaValue("_luaHead")} items={LUA_GEAR.head} onChange={(value) => setLua("_luaHead", value)} />
-          <GearPicker title="No rosto" value={luaValue("_luaFace")} items={LUA_GEAR.face} onChange={(value) => setLua("_luaFace", value)} />
-          <GearPicker title="Efeito" value={luaValue("_luaAura")} items={LUA_GEAR.aura} onChange={(value) => setLua("_luaAura", value)} />
-          <GearPicker title="Moldura" value={luaValue("_luaFrame")} items={LUA_GEAR.frame} onChange={(value) => setLua("_luaFrame", value)} />
+          <GearPicker title="Na cabeça" value={luaValue("_luaHead")} items={freeGear(LUA_GEAR.head)} onChange={(value) => setLua("_luaHead", value)} />
+          <GearPicker title="No rosto" value={luaValue("_luaFace")} items={freeGear(LUA_GEAR.face)} onChange={(value) => setLua("_luaFace", value)} />
+          <GearPicker title="Efeito" value={luaValue("_luaAura")} items={freeGear(LUA_GEAR.aura)} onChange={(value) => setLua("_luaAura", value)} />
+          <GearPicker title="Moldura" value={luaValue("_luaFrame")} items={freeGear(LUA_GEAR.frame)} onChange={(value) => setLua("_luaFrame", value)} />
+        </section>
+
+        <section className="profile-editor-card cosmetic-shop-card">
+          <div className="panel-heading"><div><span>LOJA LUNAR</span><h2>Itens que você conquista jogando</h2></div><Coins /></div>
+          <div className="cosmetic-wallet"><span>Seu saldo</span><strong>{(cosmetics.data?.coins ?? user.moonCoins).toLocaleString("pt-BR")} Luas</strong><small>Você ganha Luas ao participar das atividades. Acertos rendem mais.</small></div>
+          <div className="cosmetic-grid">{PROFILE_COSMETICS.map((item) => {
+            const unlocked = cosmeticUnlocks.has(item.id);
+            const levelOk = user.level >= item.level;
+            const coins = cosmetics.data?.coins ?? user.moonCoins;
+            const canBuy = levelOk && coins >= item.cost;
+            return <article key={item.id} className={unlocked ? "unlocked" : ""}>
+              <div className={`cosmetic-icon cosmetic-${item.id}`}><span>{item.kind === "head" ? "👑" : item.kind === "face" ? "😎" : item.kind === "aura" ? "☄️" : item.kind === "frame" ? "🖼️" : "🌌"}</span></div>
+              <div className="cosmetic-copy"><strong>{item.label}</strong><p>{item.note}</p><small>Nível {item.level} • {item.cost} Luas</small></div>
+              {unlocked ? <button type="button" onClick={() => applyCosmetic(item)}><Check /> Usar</button> : <button type="button" disabled={unlockCosmetic.isPending || !canBuy} onClick={() => unlockCosmetic.mutate(item.id)}>{levelOk ? <Coins /> : <LockKeyhole />}{levelOk ? `${item.cost}` : `Nível ${item.level}`}</button>}
+            </article>;
+          })}</div>
         </section>
 
         <section className="profile-editor-card avatar-maker">
@@ -173,7 +220,7 @@ export function ProfileView({ user, onLogin }: { user: SessionUser | null; onLog
           </details>
         </section>
 
-        <section className="profile-editor-card"><div className="panel-heading"><div><span>CARTÃO</span><h2>Cores do seu perfil</h2></div><Palette /></div><div className="color-editor-grid"><ColorField label="Destaque" value={profileTheme.accent} onChange={(accent) => setProfileTheme((v) => ({ ...v, accent }))} /><ColorField label="Capa" value={profileTheme.surface} onChange={(surface) => setProfileTheme((v) => ({ ...v, surface }))} /><ColorField label="Fundo" value={profileTheme.background} onChange={(background) => setProfileTheme((v) => ({ ...v, background }))} /><ColorField label="Cartão" value={profileTheme.card} onChange={(card) => setProfileTheme((v) => ({ ...v, card }))} /></div><div className="pattern-picker">{(["stars","orbit","grid","plain"] as const).map((pattern) => <button key={pattern} className={profileTheme.pattern === pattern ? "active" : ""} onClick={() => setProfileTheme((v) => ({ ...v, pattern }))}>{pattern}</button>)}</div><div><strong>Matérias favoritas</strong><div className="subject-picker">{subjects.map((subject) => { const active = favoriteSubjects.includes(subject); return <button key={subject} className={active ? "active" : ""} onClick={() => setFavoriteSubjects((current) => active ? current.filter((item) => item !== subject) : [...current, subject].slice(-8))}>{subject}</button>; })}</div></div></section>
+        <section className="profile-editor-card"><div className="panel-heading"><div><span>CARTÃO</span><h2>Cores do seu perfil</h2></div><Palette /></div><div className="profile-theme-presets">{PROFILE_THEME_PRESETS.map((preset)=><button key={preset.id} onClick={()=>setProfileTheme(preset.theme)}><i style={{background:`linear-gradient(135deg,${preset.theme.surface},${preset.theme.accent})`}} /><span>{preset.label}</span></button>)}</div><div className="color-editor-grid"><ColorField label="Destaque" value={profileTheme.accent} onChange={(accent) => setProfileTheme((v) => ({ ...v, accent }))} /><ColorField label="Capa" value={profileTheme.surface} onChange={(surface) => setProfileTheme((v) => ({ ...v, surface }))} /><ColorField label="Fundo" value={profileTheme.background} onChange={(background) => setProfileTheme((v) => ({ ...v, background }))} /><ColorField label="Cartão" value={profileTheme.card} onChange={(card) => setProfileTheme((v) => ({ ...v, card }))} /></div><div className="pattern-picker">{(["stars","orbit","grid","plain"] as const).map((pattern) => <button key={pattern} className={profileTheme.pattern === pattern ? "active" : ""} onClick={() => setProfileTheme((v) => ({ ...v, pattern }))}>{pattern}</button>)}</div><div><strong>Matérias favoritas</strong><div className="subject-picker">{subjects.map((subject) => { const active = favoriteSubjects.includes(subject); return <button key={subject} className={active ? "active" : ""} onClick={() => setFavoriteSubjects((current) => active ? current.filter((item) => item !== subject) : [...current, subject].slice(-8))}>{subject}</button>; })}</div></div></section>
 
         <button className="button button-primary profile-save" disabled={save.isPending || displayName.trim().length < 2 || profileTitle.trim().length < 2} onClick={() => save.mutate()}>{save.isPending ? <LoaderCircle className="spin" /> : <Save />} Salvar Mega Perfil</button>
       </div>

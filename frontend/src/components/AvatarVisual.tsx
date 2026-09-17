@@ -32,6 +32,7 @@ function Aura({ kind }: { kind: string }) {
   if (kind === "pixels") return <div className="lua-aura lua-aura-pixels" aria-hidden="true"><i /><i /><i /><i /><i /><i /></div>;
   if (kind === "neon") return <div className="lua-aura lua-aura-neon" aria-hidden="true" />;
   if (kind === "cosmic") return <div className="lua-aura lua-aura-cosmic" aria-hidden="true"><i /><i /></div>;
+  if (kind === "comet") return <div className="lua-aura lua-aura-comet" aria-hidden="true"><i /><i /><i /></div>;
   return null;
 }
 
@@ -63,6 +64,11 @@ function HeadGear({ kind }: { kind: string }) {
     <path d="M35 31 25 20M65 31l10-11" stroke="#071c45" strokeWidth="4" strokeLinecap="round" />
     <circle cx="23" cy="18" r="4" fill="#ffcc3a" /><circle cx="77" cy="18" r="4" fill="#ff62b0" />
   </svg>;
+  if (kind === "comet-crown") return <svg className="lua-gear lua-head-gear" viewBox="0 0 100 100" aria-hidden="true">
+    <path d="M24 37 31 17l19 12 19-12 7 20Z" fill="#ffd34d" stroke="#071c45" strokeWidth="3" strokeLinejoin="round" />
+    <circle cx="31" cy="17" r="4" fill="#65e9ff" stroke="#071c45" strokeWidth="2" /><circle cx="50" cy="28" r="4" fill="#a477ff" stroke="#071c45" strokeWidth="2" /><circle cx="69" cy="17" r="4" fill="#ff6ba8" stroke="#071c45" strokeWidth="2" />
+    <path d="M30 38c10 3 30 3 40 0" stroke="#fff3b0" strokeWidth="3" strokeLinecap="round" />
+  </svg>;
   return null;
 }
 
@@ -84,6 +90,10 @@ function FaceGear({ kind }: { kind: string }) {
   if (kind === "mask") return <svg className="lua-gear lua-face-gear" viewBox="0 0 100 100" aria-hidden="true">
     <path d="M27 44c14-7 32-7 46 0-1 10-8 18-23 18S28 54 27 44Z" fill="#172a5b" fillOpacity=".9" stroke="#071c45" strokeWidth="3" />
     <path d="M34 48c5-3 10-3 14 0M53 48c5-3 10-3 14 0" stroke="#65e9ff" strokeWidth="3" strokeLinecap="round" />
+  </svg>;
+  if (kind === "prism-glasses") return <svg className="lua-gear lua-face-gear" viewBox="0 0 100 100" aria-hidden="true">
+    <defs><linearGradient id="prismL" x1="0" x2="1"><stop stopColor="#65e9ff"/><stop offset=".5" stopColor="#a477ff"/><stop offset="1" stopColor="#ff6ba8"/></linearGradient></defs>
+    <rect x="22" y="41" width="25" height="17" rx="6" fill="url(#prismL)" fillOpacity=".72" stroke="#071c45" strokeWidth="3"/><rect x="53" y="41" width="25" height="17" rx="6" fill="url(#prismL)" fillOpacity=".72" stroke="#071c45" strokeWidth="3"/><path d="M47 48h6" stroke="#071c45" strokeWidth="3"/><path d="M26 45l15 9M57 45l15 9" stroke="#fff" strokeWidth="2" opacity=".75"/>
   </svg>;
   return null;
 }

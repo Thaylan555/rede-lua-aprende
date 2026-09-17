@@ -1,4 +1,4 @@
-# Rede Lua na Educação — v6 Mega Perfil + Quiz Studio
+# Rede Lua na Educação — v6.9 Painel de Mestre + Perfil Jogável
 
 A v6 transforma a plataforma em um ecossistema mais personalizável para alunos e professores, mantendo o **Supabase como fonte principal de dados** e o **LuaCore** como núcleo pedagógico.
 
@@ -68,3 +68,20 @@ Ela adiciona configuração de perfil, configuração visual de atividades, novo
 ## v6.2 — Avatar Fun Studio
 
 O Mega Perfil ganhou uma camada de personalização própria sobre o DiceBear: looks teen, robô, pixel, pirata, gamer, acessórios Lua, efeitos e molduras. As escolhas extras ficam no JSON `avatar_config`. A v6.2 inclui apenas uma migration pequena para liberar os novos estilos `bottts` e `pixel-art` na validação do perfil.
+
+
+## v6.6 — Sala Viva
+Reações ao vivo nas partidas, remoção segura de atividades com histórico e duplicação de quizzes para reutilização.
+
+## v6.8 — Perfil Vivo
+
+O Mega Perfil agora possui módulos reordenáveis com Dnd Kit, Selo Orbital com Boring Avatars, celebrações com Canvas Confetti, microanimações, gerador local de codinomes e moderação escolar em duas camadas (frontend + PostgreSQL).
+
+
+## v6.9 — Painel de Mestre + Perfil Jogável
+
+A experiência de professor ganhou um **Painel de Mestre** com XP de educador, nível, emblemas, métricas privadas e vitrine das atividades publicadas. O Hub de Criação oferece quatro pontos de partida: Quiz Relâmpago, Batalha de Chefão, Caça ao Tesouro e Cartas de Desafio. A Forja Lunar também ganhou compartilhamento entre professores com crédito do criador e cópia para a Forja pessoal.
+
+Para a turma, a Constelação agora mostra conquistas e histórico de missões. Respostas logadas rendem **Luas**, usadas na Loja Lunar para desbloquear cosméticos determinísticos do avatar — sem caixas aleatórias. O Avatar Studio ganhou Big Smile, Fun Emoji, Croodles e Micah, além dos estilos já existentes.
+
+A Sala ao Vivo mostra QR Code para entrada rápida. Os templates Chefão e Tesouro também têm componentes visuais próprios durante a partida.

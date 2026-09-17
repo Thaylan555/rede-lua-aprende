@@ -2,7 +2,7 @@ export type Role = "student" | "teacher" | "admin";
 export type Difficulty = "easy" | "medium" | "hard";
 export type ExperienceMode = "classic" | "lunar_rush" | "star_hunt" | "focus";
 export type QuestionType = "single" | "true_false";
-export type AvatarStyle = "adventurer" | "avataaars" | "personas" | "lorelei" | "notionists" | "bottts" | "pixel-art";
+export type AvatarStyle = "adventurer" | "avataaars" | "personas" | "lorelei" | "notionists" | "bottts" | "pixel-art" | "big-smile" | "fun-emoji" | "croodles" | "micah";
 
 export type AvatarConfig = Record<string, string | number | boolean | string[]>;
 
@@ -53,6 +53,7 @@ export type SessionUser = {
   profileTheme: ProfileTheme;
   profileVisibility: "private" | "classroom";
   favoriteSubjects: string[];
+  moonCoins: number;
 };
 
 export type SessionResponse = {
@@ -105,8 +106,17 @@ export type ForgeQuestion = {
   difficulty: Difficulty;
   tags: string[];
   timesUsed: number;
+  shared?: boolean;
   updatedAt: number;
 };
+
+export type CreatorProfile = {
+  stats: { activities: number; games: number; participants: number; answers: number; minutesPlayed: number; accuracy: number; creatorXp: number; creatorLevel: number };
+  badges: Array<{ id: string; label: string; note: string; icon: string }>;
+  showcase: Array<{ id: string; title: string; subject: string; difficulty: Difficulty; experienceMode: ExperienceMode; theme: QuizTheme; plays: number; questions: number }>;
+};
+
+export type SharedForgeQuestion = ForgeQuestion & { creatorName: string };
 
 export type TeacherRadar = {
   summary: { games: number; participants: number; answers: number; accuracy: number };
@@ -164,6 +174,18 @@ export type StudentConstellation = {
   }>;
   today: { answers: number; correct: number; accuracy: number };
 };
+
+export type PlayerProfile = {
+  coins: number;
+  gamesCompleted: number;
+  answers: number;
+  correct: number;
+  accuracy: number;
+  badges: Array<{ id: string; label: string; note: string; icon: string }>;
+  history: Array<{ gameId: string; title: string; subject: string; score: number; endedAt: string | null }>;
+};
+
+export type CosmeticsState = { coins: number; unlocks: string[] };
 
 export type GameReaction = {
   id: string;

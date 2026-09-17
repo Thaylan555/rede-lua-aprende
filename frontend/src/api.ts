@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 import { trackEvent } from "./analytics";
 import { normalizeGameConfig, normalizeQuizTheme } from "./quizTheme";
-import type { Activity, AvatarConfig, AvatarStyle, Difficulty, DraftQuestion, ExperienceMode, ForgeQuestion, GameConfig, GameReaction, GameState, HostGame, ParticipantSession, ProfileTheme, PublicActivity, QuizTheme, Role, SessionResponse, SessionUser, StudentConstellation, TeacherRadar } from "./types";
+import type { Activity, AvatarConfig, AvatarStyle, Difficulty, DraftQuestion, ExperienceMode, ForgeQuestion, GameConfig, GameReaction, GameState, HostGame, ParticipantSession, ProfileTheme, PublicActivity, QuizTheme, Role, SessionResponse, SessionUser, StudentConstellation, TeacherRadar, CreatorProfile, SharedForgeQuestion, PlayerProfile, CosmeticsState } from "./types";
 
 class ApiError extends Error {
   status: number;
@@ -56,7 +56,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 async function profileFor(user: { id: string; email?: string | null }): Promise<SessionUser> {
   const { data, error } = await supabase.from("rede_lua_profiles")
-    .select("display_name,role,xp,level,streak_days,bio,profile_title,avatar_style,avatar_seed,avatar_config,profile_theme,profile_visibility,favorite_subjects")
+    .select("display_name,role,xp,level,streak_days,bio,profile_title,avatar_style,avatar_seed,avatar_config,profile_theme,profile_visibility,favorite_subjects,moon_coins")
     .eq("user_id", user.id)
     .single();
   if (error) dbError(error);
@@ -76,6 +76,7 @@ async function profileFor(user: { id: string; email?: string | null }): Promise<
     profileTheme: ({ accent: "#ffbd2e", surface: "#0b2d68", background: "#071c45", card: "#ffffff", pattern: "stars", ...(data.profile_theme || {}) }) as ProfileTheme,
     profileVisibility: (data.profile_visibility || "private") as "private" | "classroom",
     favoriteSubjects: Array.isArray(data.favorite_subjects) ? data.favorite_subjects : [],
+    moonCoins: Number(data.moon_coins || 0),
   };
 }
 
@@ -331,7 +332,7 @@ export const api = {
       id: item.id, subject: item.subject, skillKey: item.skill_key, prompt: item.prompt,
       choices: Array.isArray(item.choices) ? item.choices : [], correctIndex: Number(item.correct_index || 0),
       explanation: item.explanation || "", difficulty: item.difficulty as Difficulty, tags: Array.isArray(item.tags) ? item.tags : [],
-      timesUsed: Number(item.times_used || 0), updatedAt: new Date(item.updated_at).getTime(),
+      timesUsed: Number(item.times_used || 0), shared: Boolean(item.shared), updatedAt: new Date(item.updated_at).getTime(),
     }));
     return { questions };
   },
@@ -343,6 +344,46 @@ export const api = {
     if (error) dbError(error);
     trackEvent("teacher", "forge_save", payload.subject);
     return { ok: true as const, id: data as string };
+  },
+  creatorProfile: async (): Promise<CreatorProfile> => {
+    const { data, error } = await supabase.rpc("rede_lua_creator_profile");
+    if (error) dbError(error);
+    const stats = data?.stats || {};
+    return {
+      stats: { activities:Number(stats.activities||0), games:Number(stats.games||0), participants:Number(stats.participants||0), answers:Number(stats.answers||0), minutesPlayed:Number(stats.minutesPlayed||0), accuracy:Number(stats.accuracy||0), creatorXp:Number(stats.creatorXp||0), creatorLevel:Number(stats.creatorLevel||1) },
+      badges: Array.isArray(data?.badges) ? data.badges : [],
+      showcase: (Array.isArray(data?.showcase) ? data.showcase : []).map((item:any)=>({ ...item, plays:Number(item.plays||0), questions:Number(item.questions||0), theme:normalizeQuizTheme(item.theme), experienceMode:(item.experienceMode||"classic") as ExperienceMode, difficulty:(item.difficulty||"medium") as Difficulty })),
+    };
+  },
+  sharedQuestions: async (subject?: string): Promise<{ questions: SharedForgeQuestion[] }> => {
+    const { data, error } = await supabase.rpc("rede_lua_shared_forge", { p_subject: subject || null, p_limit: 30 });
+    if (error) dbError(error);
+    return { questions: (Array.isArray(data) ? data : []).map((item:any)=>({ id:item.id, subject:item.subject, skillKey:item.skill_key||"geral", prompt:item.prompt, choices:Array.isArray(item.choices)?item.choices:[], correctIndex:Number(item.correct_index||0), explanation:item.explanation||"", difficulty:(item.difficulty||"medium") as Difficulty, tags:Array.isArray(item.tags)?item.tags:[], timesUsed:Number(item.times_used||0), updatedAt:item.updated_at?new Date(item.updated_at).getTime():Date.now(), creatorName:item.creator_name||"Professor da Rede Lua", shared:true })) };
+  },
+  toggleQuestionShare: async (id: string, shared: boolean) => {
+    const { error } = await supabase.rpc("rede_lua_set_forge_shared", { p_question_id:id, p_shared:shared });
+    if (error) dbError(error);
+    return { ok:true as const };
+  },
+  copySharedQuestion: async (id: string) => {
+    const { data, error } = await supabase.rpc("rede_lua_copy_shared_forge", { p_question_id:id });
+    if (error) dbError(error);
+    return { ok:true as const, id:String(data) };
+  },
+  playerProfile: async (): Promise<PlayerProfile> => {
+    const { data, error } = await supabase.rpc("rede_lua_player_profile");
+    if (error) dbError(error);
+    return { coins:Number(data?.coins||0), gamesCompleted:Number(data?.gamesCompleted||0), answers:Number(data?.answers||0), correct:Number(data?.correct||0), accuracy:Number(data?.accuracy||0), badges:Array.isArray(data?.badges)?data.badges:[], history:Array.isArray(data?.history)?data.history:[] };
+  },
+  myCosmetics: async (): Promise<CosmeticsState> => {
+    const { data, error } = await supabase.rpc("rede_lua_my_cosmetics");
+    if (error) dbError(error);
+    return { coins:Number(data?.coins||0), unlocks:Array.isArray(data?.unlocks)?data.unlocks:[] };
+  },
+  unlockCosmetic: async (itemId:string) => {
+    const { data, error } = await supabase.rpc("rede_lua_unlock_cosmetic", { p_item_id:itemId });
+    if (error) dbError(error);
+    return data as { ok:boolean; alreadyUnlocked?:boolean; coins:number; itemId?:string };
   },
   teacherRadar: async (days = 30) => {
     const { data, error } = await supabase.rpc("rede_lua_teacher_radar", { p_days: days });

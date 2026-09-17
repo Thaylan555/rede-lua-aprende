@@ -21,3 +21,7 @@ VITE_DICEBEAR_API_URL=https://avatar.seudominio.com/10.x
 O container deixa `OPTIONS=1` ligado porque o Estúdio de Perfil usa `/<style>/options.json` para descobrir as opções permitidas sem hardcode.
 
 > Dica: publique o container atrás de Caddy/Nginx/Cloudflare e aplique cache. O Supabase guarda apenas `avatar_style`, `avatar_seed` e `avatar_config`; a imagem é gerada sob demanda.
+
+## v6.9
+
+Além dos estilos anteriores, o editor oferece `big-smile`, `fun-emoji`, `croodles` e `micah`. Itens da Loja Lunar (como Coroa Cometa e Moldura Quasar) são overlays próprios da Rede Lua e continuam funcionando sobre qualquer estilo compatível.
