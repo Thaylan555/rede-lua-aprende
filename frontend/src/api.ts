@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 import { trackEvent } from "./analytics";
 import { normalizeGameConfig, normalizeQuizTheme } from "./quizTheme";
-import type { Activity, AvatarConfig, AvatarStyle, Difficulty, DraftQuestion, ExperienceMode, ForgeQuestion, GameConfig, GameReaction, GameState, HostGame, ParticipantSession, ProfileTheme, PublicActivity, QuizTheme, Role, SessionResponse, SessionUser, StudentConstellation, TeacherRadar, CreatorProfile, SharedForgeQuestion, PlayerProfile, CosmeticsState } from "./types";
+import type { Activity, AvatarConfig, AvatarStyle, Difficulty, DraftQuestion, ExperienceMode, ForgeQuestion, GameConfig, GameReaction, GameState, HostGame, ParticipantSession, ProfileTheme, PublicActivity, QuizTheme, Role, SessionResponse, SessionUser, StudentConstellation, TeacherRadar, CreatorProfile, SharedForgeQuestion, PlayerProfile, CosmeticsState, AdminDashboard, AdminUserRow, AdminAnnouncement, FeatureFlag, TeacherInviteAdmin, AdminAuditEntry, CosmeticCatalogItem, AdminActivityRow } from "./types";
 
 class ApiError extends Error {
   status: number;
@@ -30,6 +30,15 @@ const messageFor = (message?: string) => {
     BIO_TOO_LONG: "A bio pode ter até 220 caracteres.",
     PROFILE_TEXT_NOT_ALLOWED: "Esse texto não combina com um espaço escolar. Ajuste o nome, título ou bio e tente de novo.",
     INVALID_EXPERIENCE_MODE: "Escolha um formato de atividade válido.",
+    ADMIN_REQUIRED: "Esta área é exclusiva da gestão da Rede Lua.",
+    CANNOT_SUSPEND_SELF: "Você não pode suspender sua própria conta administrativa.",
+    ADMIN_ROLE_PROTECTED: "Contas administrativas são gerenciadas separadamente.",
+    SUPER_ADMIN_PROTECTED: "A conta principal da gestão não pode ser suspensa.",
+    INVITE_CODE_TOO_SHORT: "Use um código de professor com pelo menos 8 caracteres.",
+    FLAG_NOT_FOUND: "Esse experimento não existe mais.",
+    COSMETIC_NOT_FOUND: "Esse item da Loja Lunar não foi encontrado.",
+    COSMETIC_LEVEL_REQUIRED: "Você ainda não chegou ao nível necessário para esse item.",
+    NOT_ENOUGH_MOON_COINS: "Você ainda não tem Luas suficientes para esse item.",
   };
   return known[message] || message.replace(/^.*?:\s*/, "") || "Não foi possível concluir a ação.";
 };
@@ -40,6 +49,8 @@ function dbError(error: any): never {
     INVALID_TEACHER_CODE: 1, TEACHER_REQUIRED: 1, GAME_NOT_FOUND: 1, GAME_ALREADY_STARTED: 1,
     GAME_NOT_STARTABLE: 1, GAME_NOT_RUNNING: 1, INVALID_PARTICIPANT: 1, ACTIVITY_NOT_FOUND: 1,
     AUTH_REQUIRED: 1, INVALID_AVATAR_STYLE: 1, INVALID_PROFILE_TITLE: 1, BIO_TOO_LONG: 1, INVALID_EXPERIENCE_MODE: 1,
+    ADMIN_REQUIRED: 1, CANNOT_SUSPEND_SELF: 1, ADMIN_ROLE_PROTECTED: 1, SUPER_ADMIN_PROTECTED: 1, INVITE_CODE_TOO_SHORT: 1,
+    FLAG_NOT_FOUND: 1, COSMETIC_NOT_FOUND: 1, COSMETIC_LEVEL_REQUIRED: 1, NOT_ENOUGH_MOON_COINS: 1, PROFILE_TEXT_NOT_ALLOWED: 1,
   }).find((key) => raw.includes(key));
   throw new ApiError(messageFor(code || raw), 400, code);
 }
@@ -56,7 +67,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 async function profileFor(user: { id: string; email?: string | null }): Promise<SessionUser> {
   const { data, error } = await supabase.from("rede_lua_profiles")
-    .select("display_name,role,xp,level,streak_days,bio,profile_title,avatar_style,avatar_seed,avatar_config,profile_theme,profile_visibility,favorite_subjects,moon_coins")
+    .select("display_name,role,xp,level,streak_days,bio,profile_title,avatar_style,avatar_seed,avatar_config,profile_theme,profile_visibility,favorite_subjects,moon_coins,account_status")
     .eq("user_id", user.id)
     .single();
   if (error) dbError(error);
@@ -77,6 +88,7 @@ async function profileFor(user: { id: string; email?: string | null }): Promise<
     profileVisibility: (data.profile_visibility || "private") as "private" | "classroom",
     favoriteSubjects: Array.isArray(data.favorite_subjects) ? data.favorite_subjects : [],
     moonCoins: Number(data.moon_coins || 0),
+    accountStatus: (data.account_status || "active") as "active" | "suspended",
   };
 }
 
@@ -394,6 +406,108 @@ export const api = {
     const { data, error } = await supabase.rpc("rede_lua_student_constellation");
     if (error) dbError(error);
     return mapConstellation(data || {});
+  },
+
+  publicFeatureFlags: async (): Promise<Record<string, boolean>> => {
+    const { data, error } = await supabase.from("rede_lua_feature_flags").select("key,enabled").eq("enabled", true);
+    if (error) return {};
+    return Object.fromEntries((data || []).map((row: any) => [row.key, Boolean(row.enabled)]));
+  },
+  activeAnnouncements: async (role?: Role | null): Promise<AdminAnnouncement[]> => {
+    const { data, error } = await supabase.from("rede_lua_announcements")
+      .select("id,title,body,audience,style,active,starts_at,ends_at,created_at")
+      .order("created_at", { ascending: false });
+    if (error) return [];
+    return (data || []).filter((item: any) => item.audience === "all" || (role === "teacher" || role === "admin" ? item.audience === "teachers" : role === "student" ? item.audience === "students" : item.audience === "all")).map((item: any) => ({
+      id:item.id,title:item.title,body:item.body||"",audience:item.audience,style:item.style,active:Boolean(item.active),startsAt:item.starts_at,endsAt:item.ends_at||null,createdAt:item.created_at,
+    }));
+  },
+  mySecrets: async (): Promise<string[]> => {
+    const { data, error } = await supabase.rpc("rede_lua_my_secrets");
+    if (error) dbError(error);
+    return Array.isArray(data) ? data : [];
+  },
+  claimSecret: async (secretId: string): Promise<{ ok:boolean; new:boolean; reward:number; coins:number }> => {
+    const { data, error } = await supabase.rpc("rede_lua_claim_secret", { p_secret_id: secretId });
+    if (error) dbError(error);
+    return { ok:Boolean(data?.ok), new:Boolean(data?.new), reward:Number(data?.reward||0), coins:Number(data?.coins||0) };
+  },
+
+  adminDashboard: async (): Promise<AdminDashboard> => {
+    const { data, error } = await supabase.rpc("rede_lua_admin_dashboard");
+    if (error) dbError(error);
+    return {
+      users:Number(data?.users||0),students:Number(data?.students||0),teachers:Number(data?.teachers||0),admins:Number(data?.admins||0),suspended:Number(data?.suspended||0),activities:Number(data?.activities||0),gamesToday:Number(data?.gamesToday||0),answersToday:Number(data?.answersToday||0),activeAnnouncements:Number(data?.activeAnnouncements||0),
+      recentUsers:(Array.isArray(data?.recentUsers)?data.recentUsers:[]).map((item:any)=>({ userId:item.userId,displayName:item.displayName,role:item.role,level:Number(item.level||1),status:item.status||"active",createdAt:item.createdAt })),
+    };
+  },
+  adminUsers: async (query = ""): Promise<AdminUserRow[]> => {
+    const { data, error } = await supabase.rpc("rede_lua_admin_users", { p_query: query || null, p_limit: 60 });
+    if (error) dbError(error);
+    return (Array.isArray(data)?data:[]).map((item:any)=>({ userId:item.user_id,displayName:item.display_name,email:item.email||"",role:item.role,level:Number(item.level||1),xp:Number(item.xp||0),moonCoins:Number(item.moon_coins||0),accountStatus:item.account_status||"active",createdAt:item.created_at }));
+  },
+  adminSetUserStatus: async (userId:string, status:"active"|"suspended", reason="") => {
+    const { error } = await supabase.rpc("rede_lua_admin_set_user_status", { p_user_id:userId,p_status:status,p_reason:reason });
+    if (error) dbError(error); return { ok:true as const };
+  },
+  adminSetUserRole: async (userId:string, role:"student"|"teacher") => {
+    const { error } = await supabase.rpc("rede_lua_admin_set_user_role", { p_user_id:userId,p_role:role });
+    if (error) dbError(error); return { ok:true as const };
+  },
+  adminTeacherInvites: async (): Promise<TeacherInviteAdmin[]> => {
+    const { data, error } = await supabase.rpc("rede_lua_admin_teacher_invites");
+    if (error) dbError(error);
+    return (Array.isArray(data)?data:[]).map((item:any)=>({ id:item.id,label:item.label,active:Boolean(item.active),maxUses:Number(item.max_uses||0),uses:Number(item.uses||0),expiresAt:item.expires_at||null,createdAt:item.created_at }));
+  },
+  adminCreateTeacherInvite: async (payload:{label:string;code:string;maxUses:number;expiresAt?:string|null}) => {
+    const { data, error } = await supabase.rpc("rede_lua_admin_create_teacher_invite", { p_label:payload.label,p_code:payload.code,p_max_uses:payload.maxUses,p_expires_at:payload.expiresAt||null });
+    if (error) dbError(error); return data as {id:string;code:string};
+  },
+  adminAnnouncements: async (): Promise<AdminAnnouncement[]> => {
+    const { data, error } = await supabase.rpc("rede_lua_admin_announcements");
+    if (error) dbError(error);
+    return (Array.isArray(data)?data:[]).map((item:any)=>({ id:item.id,title:item.title,body:item.body||"",audience:item.audience,style:item.style,active:Boolean(item.active),startsAt:item.starts_at,endsAt:item.ends_at||null,createdAt:item.created_at }));
+  },
+  adminSaveAnnouncement: async (payload:{id?:string|null;title:string;body:string;audience:AdminAnnouncement["audience"];style:AdminAnnouncement["style"];active:boolean;startsAt?:string|null;endsAt?:string|null}) => {
+    const { data, error } = await supabase.rpc("rede_lua_admin_save_announcement", { p_id:payload.id||null,p_title:payload.title,p_body:payload.body,p_audience:payload.audience,p_style:payload.style,p_active:payload.active,p_starts_at:payload.startsAt||new Date().toISOString(),p_ends_at:payload.endsAt||null });
+    if (error) dbError(error); return { id:String(data) };
+  },
+  adminFlags: async (): Promise<FeatureFlag[]> => {
+    const { data, error } = await supabase.rpc("rede_lua_admin_flags");
+    if (error) dbError(error);
+    return (Array.isArray(data)?data:[]).map((item:any)=>({ key:item.key,enabled:Boolean(item.enabled),description:item.description||"",config:item.config||{},updatedAt:item.updated_at }));
+  },
+  adminSetFlag: async (key:string, enabled:boolean, config:Record<string,unknown>={}) => {
+    const { error } = await supabase.rpc("rede_lua_admin_set_flag", { p_key:key,p_enabled:enabled,p_config:config });
+    if (error) dbError(error); return { ok:true as const };
+  },
+  cosmeticCatalog: async (): Promise<CosmeticCatalogItem[]> => {
+    const { data, error } = await supabase.rpc("rede_lua_cosmetic_catalog");
+    if (error) dbError(error);
+    return (Array.isArray(data)?data:[]).map((item:any)=>({ id:item.id,label:item.label,note:item.note||"",kind:item.kind,value:item.value,cost:Number(item.cost||0),level:Number(item.min_level||1),emoji:item.emoji||"✨",active:true }));
+  },
+  adminCosmetics: async (): Promise<CosmeticCatalogItem[]> => {
+    const { data, error } = await supabase.rpc("rede_lua_admin_cosmetics");
+    if (error) dbError(error);
+    return (Array.isArray(data)?data:[]).map((item:any)=>({ id:item.id,label:item.label,note:item.note||"",kind:item.kind,value:item.value,cost:Number(item.cost||0),level:Number(item.min_level||1),emoji:item.emoji||"✨",active:Boolean(item.active) }));
+  },
+  adminUpdateCosmetic: async (payload:{id:string;cost:number;level:number;active:boolean}) => {
+    const { error } = await supabase.rpc("rede_lua_admin_update_cosmetic", { p_id:payload.id,p_cost:payload.cost,p_min_level:payload.level,p_active:payload.active });
+    if (error) dbError(error); return { ok:true as const };
+  },
+  adminActivities: async (query=""): Promise<AdminActivityRow[]> => {
+    const { data, error } = await supabase.rpc("rede_lua_admin_activities", { p_query:query||null,p_limit:80 });
+    if (error) dbError(error);
+    return (Array.isArray(data)?data:[]).map((item:any)=>({ id:item.id,title:item.title,subject:item.subject,status:item.status,authorId:item.author_id,authorName:item.author_name||"Professor",games:Number(item.games||0),questions:Number(item.questions||0),createdAt:item.created_at }));
+  },
+  adminArchiveActivity: async (activityId:string, archived=true) => {
+    const { error } = await supabase.rpc("rede_lua_admin_archive_activity", { p_activity_id:activityId,p_archived:archived });
+    if (error) dbError(error); return { ok:true as const };
+  },
+  adminAuditLog: async (): Promise<AdminAuditEntry[]> => {
+    const { data, error } = await supabase.rpc("rede_lua_admin_audit_log", { p_limit:80 });
+    if (error) dbError(error);
+    return (Array.isArray(data)?data:[]).map((item:any)=>({ id:Number(item.id),adminId:item.admin_id,adminName:item.admin_name||"Admin Rede Lua",action:item.action,targetType:item.target_type,targetId:item.target_id,details:item.details||{},createdAt:item.created_at }));
   },
 
   books: (q: string) => request<{ books: Array<{ key: string; title: string; authors: string[]; year: number | null; coverUrl: string | null }> }>(`/api/discover/books?q=${encodeURIComponent(q)}`),

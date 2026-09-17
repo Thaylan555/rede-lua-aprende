@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BookOpen, Gamepad2, GraduationCap, Home, LogOut, Menu, MoonStar, Search, Sparkles, UserRound, X } from "lucide-react";
+import { BookOpen, Gamepad2, GraduationCap, Home, LogOut, Menu, MoonStar, Search, ShieldCheck, Sparkles, UserRound, X } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "./api";
 import { initCoreAnalytics, trackPage } from "./analytics";
@@ -13,9 +13,11 @@ import { GameView } from "./views/GameView";
 import { StudentView } from "./views/StudentView";
 import { ProfileView } from "./views/ProfileView";
 import { AvatarVisual } from "./components/AvatarVisual";
+import { EasterEggLayer } from "./components/EasterEggLayer";
+import { AdminView } from "./views/AdminView";
 import type { Role } from "./types";
 
-export type View = "home" | "explore" | "student" | "profile" | "teacher" | "game";
+export type View = "home" | "explore" | "student" | "profile" | "teacher" | "game" | "admin";
 
 const navItems: Array<{ id: View; label: string; icon: typeof Home }> = [
   { id: "home", label: "Início", icon: Home },
@@ -24,6 +26,7 @@ const navItems: Array<{ id: View; label: string; icon: typeof Home }> = [
   { id: "profile", label: "Meu perfil", icon: UserRound },
   { id: "teacher", label: "Professor", icon: GraduationCap },
   { id: "game", label: "Partida", icon: Gamepad2 },
+  { id: "admin", label: "Gestão", icon: ShieldCheck },
 ];
 
 function getViewFromHash(): View {
@@ -40,6 +43,8 @@ export default function App() {
   const [gameCode, setGameCode] = useState(() => { const q = location.hash.split("?")[1] || ""; return (new URLSearchParams(q).get("code") || "").toUpperCase(); });
   const session = useQuery({ queryKey: ["session"], queryFn: api.session, staleTime: 60_000, retry: 1 });
   const user = session.data?.user || null;
+  const announcements = useQuery({ queryKey:["active-announcements",user?.role||"guest"], queryFn:()=>api.activeAnnouncements(user?.role), staleTime:45_000, retry:1 });
+  const visibleNavItems = useMemo(() => navItems.filter((item) => item.id !== "admin" || user?.role === "admin"), [user?.role]);
 
   const logout = useMutation({
     mutationFn: api.logout,
@@ -87,24 +92,31 @@ export default function App() {
     <header className="site-header">
       <div className="page-width header-inner">
         <button className="mobile-menu" onClick={() => setMenuOpen(true)} aria-label="Abrir menu"><Menu /></button>
-        <button className="brand-button" onClick={() => go("home")}><Brand compact /></button>
-        <nav className="desktop-nav" aria-label="Navegação principal">{navItems.map(({ id, label, icon: Icon }) => <button key={id} className={view === id ? "active" : ""} onClick={() => go(id)}><Icon /> {label}</button>)}</nav>
+        <button className="brand-button" onClick={() => { window.dispatchEvent(new CustomEvent("rede-lua:brand-tap")); if (view !== "home") go("home"); }}><Brand compact /></button>
+        <nav className="desktop-nav" aria-label="Navegação principal">{visibleNavItems.map(({ id, label, icon: Icon }) => <button key={id} className={view === id ? "active" : ""} onClick={() => go(id)}><Icon /> {label}</button>)}</nav>
         <div className="header-account">
           {user ? <><button className="user-chip" onClick={() => go("profile")}><span className="user-chip-avatar"><AvatarVisual style={user.avatarStyle} seed={user.avatarSeed} config={user.avatarConfig} size={72} compact /></span><div><strong>{user.displayName}</strong><small>{user.role === "teacher" ? "Professor" : user.role === "admin" ? "Gestão" : `Nível ${user.level}`}</small></div></button><button className="icon-button" onClick={() => logout.mutate()} title="Sair"><LogOut /></button></> : <button className="login-button" onClick={() => openAuth("student")}><UserRound /> Entrar</button>}
         </div>
       </div>
     </header>
 
-    {menuOpen && <div className="drawer-layer"><button className="drawer-backdrop" onClick={() => setMenuOpen(false)} aria-label="Fechar menu" /><aside className="mobile-drawer"><div className="drawer-head"><Brand compact /><button className="icon-button" onClick={() => setMenuOpen(false)}><X /></button></div><span className="drawer-current"><MoonStar /> {currentLabel}</span><nav>{navItems.map(({ id, label, icon: Icon }) => <button key={id} className={view === id ? "active" : ""} onClick={() => go(id)}><Icon /><span>{label}</span></button>)}</nav>{user ? <button className="drawer-login" onClick={() => logout.mutate()}><LogOut /> Sair da conta</button> : <button className="drawer-login" onClick={() => { setMenuOpen(false); openAuth("student"); }}><UserRound /> Entrar ou criar conta</button>}</aside></div>}
+    {announcements.data?.length ? <div className={`global-announcement global-announcement-${announcements.data[0].style}`}><div className="page-width"><Sparkles/><div><strong>{announcements.data[0].title}</strong>{announcements.data[0].body && <span>{announcements.data[0].body}</span>}</div></div></div> : null}
+
+    {menuOpen && <div className="drawer-layer"><button className="drawer-backdrop" onClick={() => setMenuOpen(false)} aria-label="Fechar menu" /><aside className="mobile-drawer"><div className="drawer-head"><Brand compact /><button className="icon-button" onClick={() => setMenuOpen(false)}><X /></button></div><span className="drawer-current"><MoonStar /> {currentLabel}</span><nav>{visibleNavItems.map(({ id, label, icon: Icon }) => <button key={id} className={view === id ? "active" : ""} onClick={() => go(id)}><Icon /><span>{label}</span></button>)}</nav>{user ? <button className="drawer-login" onClick={() => logout.mutate()}><LogOut /> Sair da conta</button> : <button className="drawer-login" onClick={() => { setMenuOpen(false); openAuth("student"); }}><UserRound /> Entrar ou criar conta</button>}</aside></div>}
 
     <main className="site-main">
-      {view === "home" && <HomeView code={gameCode} setCode={setGameCode} onJoin={joinFromHome} onTeacher={() => user ? go("teacher") : openAuth("teacher")} onExplore={() => go("explore")} onStudent={() => user ? go("student") : openAuth("student")} />}
-      {view === "explore" && <ExploreView />}
-      {view === "student" && <StudentView user={user} onLogin={() => openAuth("student")} onExplore={() => go("explore")} />}
-      {view === "profile" && <ProfileView user={user} onLogin={() => openAuth("student")} />}
-      {view === "teacher" && <TeacherView user={user} onLogin={() => openAuth("teacher")} />}
-      {view === "game" && <GameView initialCode={gameCode} />}
+      {user?.accountStatus === "suspended" && view !== "admin" ? <div className="page-width page-pad"><section className="suspended-gate"><ShieldCheck/><span>CONTA PAUSADA</span><h1>Seu acesso está temporariamente pausado.</h1><p>Se isso parece um engano, fale com a equipe da Rede Lua. Seus dados e seu progresso continuam guardados.</p></section></div> : <>
+        {view === "home" && <HomeView code={gameCode} setCode={setGameCode} onJoin={joinFromHome} onTeacher={() => user ? go("teacher") : openAuth("teacher")} onExplore={() => go("explore")} onStudent={() => user ? go("student") : openAuth("student")} />}
+        {view === "explore" && <ExploreView />}
+        {view === "student" && <StudentView user={user} onLogin={() => openAuth("student")} onExplore={() => go("explore")} />}
+        {view === "profile" && <ProfileView user={user} onLogin={() => openAuth("student")} />}
+        {view === "teacher" && <TeacherView user={user} onLogin={() => openAuth("teacher")} />}
+        {view === "game" && <GameView initialCode={gameCode} />}
+        {view === "admin" && <AdminView user={user} />}
+      </>}
     </main>
+
+    <EasterEggLayer view={view} user={user} />
 
     <footer className="site-footer">
       <div className="page-width footer-inner"><Brand compact /><p>Quiz, jogo e aprendizado com a cara da sua turma.</p><div><button onClick={() => go("explore")}><BookOpen /> Fontes educacionais</button><span>Rede Lua na educação • 2026</span></div></div>

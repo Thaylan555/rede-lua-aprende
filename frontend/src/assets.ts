@@ -19,3 +19,10 @@ export const interfaceAssets = {
   staff: "/assets/rede-lua/icons/5847-staff-white.png",
   member: "/assets/rede-lua/icons/3124-member-white-black.png",
 };
+
+export const lumiAnimations = [
+  { id: "calm", label: "Lumi tranquilo", video: "/assets/rede-lua/lumi/lumi-calm.mp4", poster: "/assets/rede-lua/lumi/lumi-calm.webp" },
+  { id: "cheer", label: "Lumi comemorando", video: "/assets/rede-lua/lumi/lumi-cheer.mp4", poster: "/assets/rede-lua/lumi/lumi-cheer.webp" },
+  { id: "curious", label: "Lumi curioso", video: "/assets/rede-lua/lumi/lumi-curious.mp4", poster: "/assets/rede-lua/lumi/lumi-curious.webp" },
+  { id: "smile", label: "Lumi sorrindo", video: "/assets/rede-lua/lumi/lumi-smile.mp4", poster: "/assets/rede-lua/lumi/lumi-smile.webp" },
+] as const;

@@ -85,3 +85,7 @@ A experiência de professor ganhou um **Painel de Mestre** com XP de educador, n
 Para a turma, a Constelação agora mostra conquistas e histórico de missões. Respostas logadas rendem **Luas**, usadas na Loja Lunar para desbloquear cosméticos determinísticos do avatar — sem caixas aleatórias. O Avatar Studio ganhou Big Smile, Fun Emoji, Croodles e Micah, além dos estilos já existentes.
 
 A Sala ao Vivo mostra QR Code para entrada rápida. Os templates Chefão e Tesouro também têm componentes visuais próprios durante a partida.
+
+## v7.0 — Universo Vivo
+
+A v7 adiciona a **Rede Lua Control**, animações oficiais do Lumi, avisos globais, feature flags, Easter eggs com recompensas, moderação administrativa e catálogo de cosméticos administrável. A autorização de admin fica no Supabase e não depende do JavaScript do navegador.

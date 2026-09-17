@@ -54,6 +54,7 @@ export type SessionUser = {
   profileVisibility: "private" | "classroom";
   favoriteSubjects: string[];
   moonCoins: number;
+  accountStatus: "active" | "suspended";
 };
 
 export type SessionResponse = {
@@ -242,4 +243,94 @@ export type GameState = {
   };
   answer: null | { choiceIndex: number; correct: boolean; awardedPoints: number; explanation: string };
   leaderboard: Array<{ id: string; displayName: string; score: number }>;
+};
+
+export type AdminDashboard = {
+  users: number;
+  students: number;
+  teachers: number;
+  admins: number;
+  suspended: number;
+  activities: number;
+  gamesToday: number;
+  answersToday: number;
+  activeAnnouncements: number;
+  recentUsers: Array<{ userId: string; displayName: string; role: Role; level: number; status: "active" | "suspended"; createdAt: string }>;
+};
+
+export type AdminUserRow = {
+  userId: string;
+  displayName: string;
+  email: string;
+  role: Role;
+  level: number;
+  xp: number;
+  moonCoins: number;
+  accountStatus: "active" | "suspended";
+  createdAt: string;
+};
+
+export type AdminAnnouncement = {
+  id: string;
+  title: string;
+  body: string;
+  audience: "all" | "students" | "teachers";
+  style: "info" | "success" | "warning" | "event";
+  active: boolean;
+  startsAt: string;
+  endsAt: string | null;
+  createdAt: string;
+};
+
+export type FeatureFlag = {
+  key: string;
+  enabled: boolean;
+  description: string;
+  config: Record<string, unknown>;
+  updatedAt?: string;
+};
+
+export type TeacherInviteAdmin = {
+  id: string;
+  label: string;
+  active: boolean;
+  maxUses: number;
+  uses: number;
+  expiresAt: string | null;
+  createdAt: string;
+};
+
+export type AdminAuditEntry = {
+  id: number;
+  adminId: string;
+  adminName: string;
+  action: string;
+  targetType: string;
+  targetId: string;
+  details: Record<string, unknown>;
+  createdAt: string;
+};
+
+export type CosmeticCatalogItem = {
+  id: string;
+  label: string;
+  note: string;
+  kind: "head" | "face" | "aura" | "frame" | "theme";
+  value: string;
+  cost: number;
+  level: number;
+  emoji: string;
+  active?: boolean;
+};
+
+export type AdminActivityRow = {
+  id: string;
+  title: string;
+  subject: string;
+  status: "draft" | "published" | "archived";
+  authorId: string;
+  authorName: string;
+  games: number;
+  questions: number;
+  createdAt: string;
 };

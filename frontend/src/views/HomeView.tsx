@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { api } from "../api";
 import { reactionAssets } from "../assets";
+import { LumiMoment } from "../components/LumiMoment";
 
 export function HomeView({ code, setCode, onJoin, onTeacher, onExplore, onStudent }: { code: string; setCode: (value: string) => void; onJoin: () => void; onTeacher: () => void; onExplore: () => void; onStudent: () => void }) {
   const recommended = useQuery({ queryKey: ["recommendations"], queryFn: api.recommendations, staleTime: 60_000, retry: 1 });
@@ -51,6 +52,8 @@ export function HomeView({ code, setCode, onJoin, onTeacher, onExplore, onStuden
             <span><ShieldCheck /> sem anúncios</span>
             <span><Sparkles /> perfil do seu jeito</span>
           </div>
+
+          <div className="home-lumi-note"><LumiMoment kind="smile" message="Errou? tenta outra. Aqui não tem bronca por aprender 😌" /></div>
         </div>
 
         <div className="classroom-playground" aria-label="Exemplo divertido de uma partida Rede Lua">

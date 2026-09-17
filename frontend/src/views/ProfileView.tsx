@@ -11,7 +11,7 @@ import { AVATAR_KITS, AVATAR_STYLES, humanizeAvatarOption, humanizeAvatarValue, 
 import { AvatarVisual } from "../components/AvatarVisual";
 import { profileTextIssue } from "../moderation";
 import { makeProfileCodename, normalizeWidgetOrder, PROFILE_WIDGET_META, type ProfileWidgetId } from "../profileFun";
-import type { AvatarConfig, AvatarStyle, ProfileTheme, SessionUser } from "../types";
+import type { AvatarConfig, AvatarStyle, CosmeticCatalogItem, ProfileTheme, SessionUser } from "../types";
 
 const subjects = ["Matemática", "Português", "Ciências", "História", "Geografia", "Inglês", "Física", "Química", "Biologia", "Artes"];
 const PROFILE_THEME_PRESETS: Array<{ id:string; label:string; theme:ProfileTheme }> = [
@@ -63,6 +63,7 @@ export function ProfileView({ user, onLogin }: { user: SessionUser | null; onLog
 
   const avatarOptions = useQuery({ queryKey: ["dicebear-options", avatarStyle], queryFn: () => loadAvatarOptions(avatarStyle), staleTime: 60 * 60 * 1000, retry: 1 });
   const cosmetics = useQuery({ queryKey: ["profile-cosmetics", user?.id], queryFn: api.myCosmetics, enabled: Boolean(user), staleTime: 15_000, retry: 1 });
+  const cosmeticCatalog = useQuery({ queryKey:["cosmetic-catalog"], queryFn:api.cosmeticCatalog, enabled:Boolean(user), staleTime:60_000, retry:1 });
   const unlockCosmetic = useMutation({
     mutationFn: (itemId: string) => api.unlockCosmetic(itemId),
     onSuccess: async () => {
@@ -111,9 +112,10 @@ export function ProfileView({ user, onLogin }: { user: SessionUser | null; onLog
   };
 
   const cosmeticUnlocks = new Set(cosmetics.data?.unlocks || []);
-  const premiumValues = new Set<string>(PROFILE_COSMETICS.filter((item) => item.kind !== "theme").map((item) => item.value));
+  const catalogItems: CosmeticCatalogItem[] = cosmeticCatalog.data?.length ? cosmeticCatalog.data : PROFILE_COSMETICS.map((item) => ({ ...item, emoji:item.kind === "head" ? "☄️" : item.kind === "face" ? "🌈" : item.kind === "aura" ? "✨" : item.kind === "frame" ? "🪐" : "🌌", active:true })) as CosmeticCatalogItem[];
+  const premiumValues = new Set<string>(catalogItems.filter((item) => item.kind !== "theme").map((item) => item.value));
   const freeGear = <T extends readonly (readonly [string, string])[]>(items: T) => items.filter(([id]) => !premiumValues.has(id));
-  const applyCosmetic = (item: (typeof PROFILE_COSMETICS)[number]) => {
+  const applyCosmetic = (item: CosmeticCatalogItem) => {
     if (!cosmeticUnlocks.has(item.id)) return;
     if (item.kind === "head") setLua("_luaHead", item.value);
     if (item.kind === "face") setLua("_luaFace", item.value);
@@ -189,13 +191,13 @@ export function ProfileView({ user, onLogin }: { user: SessionUser | null; onLog
         <section className="profile-editor-card cosmetic-shop-card">
           <div className="panel-heading"><div><span>LOJA LUNAR</span><h2>Itens que você conquista jogando</h2></div><Coins /></div>
           <div className="cosmetic-wallet"><span>Seu saldo</span><strong>{(cosmetics.data?.coins ?? user.moonCoins).toLocaleString("pt-BR")} Luas</strong><small>Você ganha Luas ao participar das atividades. Acertos rendem mais.</small></div>
-          <div className="cosmetic-grid">{PROFILE_COSMETICS.map((item) => {
+          <div className="cosmetic-grid">{catalogItems.map((item) => {
             const unlocked = cosmeticUnlocks.has(item.id);
             const levelOk = user.level >= item.level;
             const coins = cosmetics.data?.coins ?? user.moonCoins;
             const canBuy = levelOk && coins >= item.cost;
             return <article key={item.id} className={unlocked ? "unlocked" : ""}>
-              <div className={`cosmetic-icon cosmetic-${item.id}`}><span>{item.kind === "head" ? "👑" : item.kind === "face" ? "😎" : item.kind === "aura" ? "☄️" : item.kind === "frame" ? "🖼️" : "🌌"}</span></div>
+              <div className={`cosmetic-icon cosmetic-${item.id}`}><span>{item.emoji || (item.kind === "head" ? "👑" : item.kind === "face" ? "😎" : item.kind === "aura" ? "☄️" : item.kind === "frame" ? "🖼️" : "🌌")}</span></div>
               <div className="cosmetic-copy"><strong>{item.label}</strong><p>{item.note}</p><small>Nível {item.level} • {item.cost} Luas</small></div>
               {unlocked ? <button type="button" onClick={() => applyCosmetic(item)}><Check /> Usar</button> : <button type="button" disabled={unlockCosmetic.isPending || !canBuy} onClick={() => unlockCosmetic.mutate(item.id)}>{levelOk ? <Coins /> : <LockKeyhole />}{levelOk ? `${item.cost}` : `Nível ${item.level}`}</button>}
             </article>;

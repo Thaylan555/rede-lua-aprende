@@ -50,3 +50,26 @@ O bucket público `rede-lua-assets` aceita PNG/JPEG/WebP até 3 MB. Políticas l
 - `rede_lua_shared_forge()` expõe perguntas compartilhadas somente para professores autenticados. A cópia preserva o crédito exibido no Hub e cria uma versão editável na Forja do professor.
 - Novos estilos DiceBear continuam declarativos: o banco guarda estilo/seed/opções, nunca precisa armazenar a imagem gerada.
 - O QR Code usa um link `/#/game?code=...`; o roteador lê o código e pré-preenche a entrada da partida.
+
+## Universo Vivo / Admin v7
+
+```text
+Cloudflare Pages
+  └─ React
+      ├─ EasterEggLayer / LumiMoment
+      ├─ Rede Lua Control
+      └─ experiências aluno/professor
+            │
+            ▼
+Supabase
+  ├─ Auth
+  ├─ rede_lua_admins
+  ├─ rede_lua_admin_audit
+  ├─ rede_lua_announcements
+  ├─ rede_lua_feature_flags
+  ├─ rede_lua_secret_unlocks
+  ├─ rede_lua_cosmetic_catalog
+  └─ RPCs com autorização server-side
+```
+
+O e-mail de bootstrap é usado apenas para associar o primeiro `user_id` ao papel `super_admin`; as decisões de autorização posteriores consultam `rede_lua_admins` e o status ativo da conta.
