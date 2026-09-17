@@ -28,6 +28,7 @@ const messageFor = (message?: string) => {
     INVALID_AVATAR_STYLE: "Esse estilo de avatar não está disponível.",
     INVALID_PROFILE_TITLE: "Escolha um título de perfil válido.",
     BIO_TOO_LONG: "A bio pode ter até 220 caracteres.",
+    PROFILE_TEXT_NOT_ALLOWED: "Esse texto não combina com um espaço escolar. Ajuste o nome, título ou bio e tente de novo.",
     INVALID_EXPERIENCE_MODE: "Escolha um formato de atividade válido.",
   };
   return known[message] || message.replace(/^.*?:\s*/, "") || "Não foi possível concluir a ação.";

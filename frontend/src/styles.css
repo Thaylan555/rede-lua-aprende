@@ -1708,3 +1708,49 @@ body {
   .human-closing-actions { width: 100%; }
   .human-closing-actions .button { width: 100%; }
 }
+
+/* v6.8 — Perfil vivo: módulos, selo orbital e microinterações */
+.profile-widget-stack { display: grid; gap: 9px; padding: 0 18px 20px; }
+.profile-widget { margin: 0 !important; }
+.profile-stat-row.profile-widget { grid-template-columns: repeat(2,1fr); }
+.profile-streak-widget, .profile-signature-widget { display:flex; align-items:center; justify-content:center; gap:10px; border:1px solid rgba(7,29,73,.13); border-radius:16px; padding:10px 12px; background:rgba(255,255,255,.76); }
+.profile-streak-widget > span { font-size:24px; }
+.profile-streak-widget div, .profile-signature-widget div { display:grid; gap:2px; }
+.profile-streak-widget strong, .profile-signature-widget strong { color:var(--profile-surface); font:900 13px/1.1 ui-rounded,system-ui; }
+.profile-streak-widget small, .profile-signature-widget small { color:var(--muted); font-size:9px; }
+.profile-signature-widget { justify-content:flex-start; }
+.profile-signature-widget svg { flex:0 0 auto; border-radius:13px; border:2px solid var(--navy); }
+.profile-layout-list { display:grid; gap:9px; }
+.profile-layout-item { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:11px; min-height:58px; padding:10px 12px; border:1.5px solid #c9d4e7; border-radius:15px; background:#fff; box-shadow:0 2px 0 rgba(7,29,73,.05); touch-action:none; cursor:grab; transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease; }
+.profile-layout-item.dragging { opacity:.72; transform:scale(1.02); box-shadow:5px 6px 0 rgba(7,29,73,.16); }
+.profile-layout-grip { width:34px; height:34px; display:grid; place-items:center; border-radius:11px; background:#eef3ff; color:var(--navy); }
+.profile-layout-grip svg { width:18px; }
+.profile-layout-item > div { display:grid; gap:3px; }
+.profile-layout-item strong { color:var(--navy); font-size:13px; }
+.profile-layout-item small { color:var(--muted); font-size:10px; line-height:1.3; }
+.profile-layout-order { width:27px; height:27px; display:grid; place-items:center; border-radius:999px; background:#fff3bd; color:#7b5c00; font-size:10px; font-weight:950; }
+.codename-field { display:grid; grid-template-columns:1fr auto; gap:7px; }
+.codename-field button { border:1.5px solid var(--navy); border-radius:12px; background:#fff7d6; color:var(--navy); font:850 10px/1 ui-rounded,system-ui; padding:0 10px; display:flex; align-items:center; gap:5px; white-space:nowrap; }
+.codename-field button svg { width:15px; }
+.school-safe-note { margin:12px 0 0; padding:9px 11px; display:flex; align-items:flex-start; gap:7px; border-radius:12px; background:#eef8f0; color:#376144; font-size:10px; line-height:1.4; }
+.school-safe-note svg { width:15px; flex:0 0 auto; }
+
+@keyframes luaZeroGravity { 0%,100% { transform:translateY(0) rotate(-.4deg); } 50% { transform:translateY(-5px) rotate(.4deg); } }
+.profile-avatar-shell { animation:luaZeroGravity 5.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-avatar-shell { animation:none; }
+  .animate__animated { animation:none !important; }
+  .profile-layout-item { transition:none; }
+}
+
+@media (max-width: 700px) {
+  .profile-widget-stack { gap:6px; padding:0 11px 13px; }
+  .profile-streak-widget, .profile-signature-widget { padding:7px 9px; border-radius:12px; }
+  .profile-signature-widget svg { width:34px; height:34px; border-radius:10px; }
+  .profile-layout-item { min-height:50px; padding:8px 9px; border-radius:12px; }
+  .profile-layout-grip { width:30px; height:30px; }
+  .profile-layout-item small { display:none; }
+  .codename-field { grid-template-columns:1fr; }
+  .codename-field button { justify-content:center; min-height:35px; }
+}

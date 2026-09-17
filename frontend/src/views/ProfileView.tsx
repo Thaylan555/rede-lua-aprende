@@ -1,16 +1,30 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bot, Check, Dices, Gamepad2, Glasses, LoaderCircle, MoonStar, Palette, Save, ShieldCheck, Sparkles, UserRound, WandSparkles } from "lucide-react";
+import { DragDropProvider } from "@dnd-kit/react";
+import { isSortable, useSortable } from "@dnd-kit/react/sortable";
+import BoringAvatar from "boring-avatars";
+import confetti from "canvas-confetti";
+import { Bot, Check, Dices, Gamepad2, Glasses, GripVertical, LoaderCircle, MoonStar, Palette, Save, ShieldCheck, Sparkles, UserRound, WandSparkles } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "../api";
 import { AVATAR_KITS, AVATAR_STYLES, humanizeAvatarOption, humanizeAvatarValue, keepLuaGear, loadAvatarOptions, LUA_GEAR, usefulAvatarOptions } from "../avatar";
 import { AvatarVisual } from "../components/AvatarVisual";
+import { profileTextIssue } from "../moderation";
+import { makeProfileCodename, normalizeWidgetOrder, PROFILE_WIDGET_META, type ProfileWidgetId } from "../profileFun";
 import type { AvatarConfig, AvatarStyle, ProfileTheme, SessionUser } from "../types";
 
 const subjects = ["Matemática", "Português", "Ciências", "História", "Geografia", "Inglês", "Física", "Química", "Biologia", "Artes"];
 
 function randomSeed() {
   return `lua-${crypto.randomUUID().replace(/-/g, "").slice(0, 18)}`;
+}
+
+function celebrate() {
+  void confetti({ particleCount: 58, spread: 72, startVelocity: 28, origin: { y: .78 }, disableForReducedMotion: true });
+  window.setTimeout(() => {
+    void confetti({ particleCount: 28, spread: 52, angle: 60, origin: { x: .18, y: .7 }, disableForReducedMotion: true });
+    void confetti({ particleCount: 28, spread: 52, angle: 120, origin: { x: .82, y: .7 }, disableForReducedMotion: true });
+  }, 120);
 }
 
 export function ProfileView({ user, onLogin }: { user: SessionUser | null; onLogin: () => void }) {
@@ -32,12 +46,35 @@ export function ProfileView({ user, onLogin }: { user: SessionUser | null; onLog
     setVisibility(user.profileVisibility); setFavoriteSubjects(user.favoriteSubjects);
   }, [user?.id]);
 
+  useEffect(() => {
+    if (!user) return;
+    const key = `rede-lua-seen-level:${user.id}`;
+    const previous = Number(localStorage.getItem(key) || user.level);
+    if (user.level > previous) celebrate();
+    localStorage.setItem(key, String(user.level));
+  }, [user?.id, user?.level]);
+
   const avatarOptions = useQuery({ queryKey: ["dicebear-options", avatarStyle], queryFn: () => loadAvatarOptions(avatarStyle), staleTime: 60 * 60 * 1000, retry: 1 });
   const curatedOptions = useMemo(() => avatarOptions.data ? usefulAvatarOptions(avatarOptions.data) : [], [avatarOptions.data]);
+  const widgetOrder = normalizeWidgetOrder(avatarConfig._luaWidgets);
+
+  const setWidgetOrder = (next: ProfileWidgetId[]) => setAvatarConfig((current) => ({ ...current, _luaWidgets: next }));
 
   const save = useMutation({
-    mutationFn: () => api.updateProfile({ displayName: displayName.trim(), bio: bio.trim(), profileTitle: profileTitle.trim(), avatarStyle, avatarSeed, avatarConfig, profileTheme, visibility, favoriteSubjects }),
-    onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ["session"] }); toast.success("Perfil lunar atualizado."); },
+    mutationFn: () => {
+      const issue = profileTextIssue({ displayName, bio, profileTitle });
+      if (issue) throw new Error(issue);
+      return api.updateProfile({ displayName: displayName.trim(), bio: bio.trim(), profileTitle: profileTitle.trim(), avatarStyle, avatarSeed, avatarConfig, profileTheme, visibility, favoriteSubjects });
+    },
+    onSuccess: async () => {
+      const firstKey = `rede-lua-profile-celebrated:${user?.id || "guest"}`;
+      const firstCelebration = !localStorage.getItem(firstKey);
+      const changedLook = !!user && (avatarStyle !== user.avatarStyle || avatarSeed !== user.avatarSeed || JSON.stringify(avatarConfig) !== JSON.stringify(user.avatarConfig));
+      if (firstCelebration || changedLook) celebrate();
+      localStorage.setItem(firstKey, "1");
+      await queryClient.invalidateQueries({ queryKey: ["session"] });
+      toast.success("Perfil salvo. Ficou com a sua cara ✨");
+    },
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -51,24 +88,46 @@ export function ProfileView({ user, onLogin }: { user: SessionUser | null; onLog
   const applyKit = (kit: (typeof AVATAR_KITS)[number]) => {
     setAvatarStyle(kit.style);
     setAvatarSeed(randomSeed());
-    setAvatarConfig({ ...kit.config, _luaLook: kit.id });
+    setAvatarConfig((current) => ({ ...kit.config, _luaWidgets: normalizeWidgetOrder(current._luaWidgets), _luaLook: kit.id }));
     setProfileTheme(kit.theme);
   };
 
+  const renderProfileWidget = (id: ProfileWidgetId) => {
+    if (id === "stats") return <div key={id} className="profile-stat-row profile-widget"><div><strong>{user.level}</strong><span>Nível</span></div><div><strong>{user.xp.toLocaleString("pt-BR")}</strong><span>XP</span></div></div>;
+    if (id === "streak") return <div key={id} className="profile-streak-widget profile-widget"><span>🔥</span><div><strong>{user.streakDays} {user.streakDays === 1 ? "dia" : "dias"}</strong><small>de sequência</small></div></div>;
+    if (id === "subjects") return <div key={id} className="profile-subject-chips profile-widget">{favoriteSubjects.length ? favoriteSubjects.slice(0, 4).map((subject) => <span key={subject}>{subject}</span>) : <span>Escolha matérias favoritas</span>}</div>;
+    return <div key={id} className="profile-signature-widget profile-widget"><BoringAvatar size={44} name={`${displayName}-${user.id}`} variant="bauhaus" colors={[profileTheme.accent, profileTheme.surface, profileTheme.background, "#ffffff", "#2e78df"]} /><div><strong>Seu selo orbital</strong><small>Único para este perfil</small></div></div>;
+  };
+
   return <div className="page-width page-pad profile-view">
-    <header className="profile-page-head"><div><span className="eyebrow"><Sparkles size={16} /> Mega Perfil</span><h1>Seu perfil, sua vibe.</h1><p>Escolha um estilo, acessórios e cores. Misture tudo do seu jeito.</p></div><div className="profile-role-pill"><ShieldCheck /><span>{roleLabel}</span></div></header>
+    <header className="profile-page-head animate__animated animate__fadeIn"><div><span className="eyebrow"><Sparkles size={16} /> Mega Perfil</span><h1>Seu perfil, sua vibe.</h1><p>Escolha um estilo, acessórios e cores. Misture tudo do seu jeito.</p></div><div className="profile-role-pill"><ShieldCheck /><span>{roleLabel}</span></div></header>
 
     <section className="profile-studio-grid">
-      <aside className={`profile-preview pattern-${profileTheme.pattern}`} style={{ ["--profile-bg" as string]: profileTheme.background, ["--profile-surface" as string]: profileTheme.surface, ["--profile-accent" as string]: profileTheme.accent, ["--profile-card" as string]: profileTheme.card }}>
+      <aside className={`profile-preview pattern-${profileTheme.pattern} animate__animated animate__fadeInUp`} style={{ ["--profile-bg" as string]: profileTheme.background, ["--profile-surface" as string]: profileTheme.surface, ["--profile-accent" as string]: profileTheme.accent, ["--profile-card" as string]: profileTheme.card }}>
         <div className="profile-cover"><MoonStar /><span>REDE LUA • {roleLabel.toUpperCase()}</span></div>
         <div className="profile-avatar-shell"><AvatarVisual style={avatarStyle} seed={avatarSeed} config={avatarConfig} size={360} alt={`Avatar de ${displayName}`} /></div>
         <div className="profile-preview-copy"><span>{profileTitle || "Explorador Lunar"}</span><h2>{displayName || "Seu nome"}</h2><p>{bio || "Sua bio aparece aqui. Conte um pouco sobre o que você curte aprender."}</p></div>
-        <div className="profile-stat-row"><div><strong>{user.level}</strong><span>Nível</span></div><div><strong>{user.xp.toLocaleString("pt-BR")}</strong><span>XP</span></div><div><strong>{user.streakDays}</strong><span>Sequência</span></div></div>
-        <div className="profile-subject-chips">{favoriteSubjects.length ? favoriteSubjects.slice(0, 4).map((subject) => <span key={subject}>{subject}</span>) : <span>Escolha matérias favoritas</span>}</div>
+        <div className="profile-widget-stack">{widgetOrder.map(renderProfileWidget)}</div>
       </aside>
 
       <div className="profile-editor-stack">
-        <section className="profile-editor-card"><div className="panel-heading"><div><span>IDENTIDADE</span><h2>Nome, título e bio</h2></div><UserRound /></div><div className="profile-fields two"><label>Nome de exibição<input value={displayName} onChange={(e) => setDisplayName(e.target.value.slice(0, 32))} maxLength={32} /></label><label>Título do perfil<input value={profileTitle} onChange={(e) => setProfileTitle(e.target.value.slice(0, 42))} maxLength={42} placeholder="Explorador Lunar" /></label></div><label>Bio<textarea value={bio} onChange={(e) => setBio(e.target.value.slice(0, 220))} maxLength={220} placeholder="O que você curte aprender ou fazer?" /><small>{bio.length}/220</small></label><div className="visibility-row"><label><input type="radio" checked={visibility === "private"} onChange={() => setVisibility("private")} /> Privado</label><label><input type="radio" checked={visibility === "classroom"} onChange={() => setVisibility("classroom")} /> Visível nas turmas/partidas</label></div></section>
+        <section className="profile-editor-card"><div className="panel-heading"><div><span>IDENTIDADE</span><h2>Nome, título e bio</h2></div><UserRound /></div><div className="profile-fields two"><label>Nome de exibição<input value={displayName} onChange={(e) => setDisplayName(e.target.value.slice(0, 32))} maxLength={32} /></label><label>Título do perfil<div className="codename-field"><input value={profileTitle} onChange={(e) => setProfileTitle(e.target.value.slice(0, 42))} maxLength={42} placeholder="Explorador Lunar" /><button type="button" onClick={() => setProfileTitle(makeProfileCodename(user.role))}><Dices /> me dá um</button></div></label></div><label>Bio<textarea value={bio} onChange={(e) => setBio(e.target.value.slice(0, 220))} maxLength={220} placeholder="O que você curte aprender ou fazer?" /><small>{bio.length}/220</small></label><div className="visibility-row"><label><input type="radio" checked={visibility === "private"} onChange={() => setVisibility("private")} /> Privado</label><label><input type="radio" checked={visibility === "classroom"} onChange={() => setVisibility("classroom")} /> Visível nas turmas/partidas</label></div><p className="school-safe-note"><ShieldCheck /> Nome, título e bio passam por um filtro escolar antes de serem salvos.</p></section>
+
+        <section className="profile-editor-card profile-layout-card">
+          <div className="panel-heading"><div><span>MEU CARTÃO</span><h2>Arraste e monte do seu jeito</h2></div><GripVertical /></div>
+          <p className="gear-intro">Mude a ordem dos módulos. A organização fica salva junto com seu perfil.</p>
+          <DragDropProvider onDragEnd={(event) => {
+            if (event.canceled) return;
+            const { source } = event.operation;
+            if (!isSortable(source) || source.initialIndex === source.index) return;
+            const next = [...widgetOrder];
+            const [moved] = next.splice(source.initialIndex, 1);
+            next.splice(source.index, 0, moved);
+            setWidgetOrder(next);
+          }}>
+            <div className="profile-layout-list">{widgetOrder.map((id, index) => <SortableProfileWidget key={id} id={id} index={index} />)}</div>
+          </DragDropProvider>
+        </section>
 
         <section className="profile-editor-card avatar-maker avatar-fun-studio">
           <div className="panel-heading"><div><span>LOOKS PRONTOS</span><h2>Escolha uma vibe e depois mexa em tudo</h2></div><WandSparkles /></div>
@@ -83,8 +142,8 @@ export function ProfileView({ user, onLogin }: { user: SessionUser | null; onLog
 
         <section className="profile-editor-card avatar-maker">
           <div className="panel-heading"><div><span>PERSONAGEM</span><h2>Base do seu avatar</h2></div><Bot /></div>
-          <div className="avatar-style-grid">{AVATAR_STYLES.map((style) => <button key={style.id} className={avatarStyle === style.id ? "active" : ""} onClick={() => { setAvatarStyle(style.id); setAvatarConfig((current) => ({ ...keepLuaGear(current), _luaLook: "custom" })); }}><strong>{style.label}</strong><small>{style.note}</small>{avatarStyle === style.id && <Check />}</button>)}</div>
-          <button className="button button-ghost avatar-random-button" onClick={() => { setAvatarSeed(randomSeed()); setAvatarConfig((current) => ({ ...keepLuaGear(current), _luaLook: "custom" })); }}><Dices /> Outra combinação</button>
+          <div className="avatar-style-grid">{AVATAR_STYLES.map((style) => <button key={style.id} className={avatarStyle === style.id ? "active" : ""} onClick={() => { setAvatarStyle(style.id); setAvatarConfig((current) => ({ ...keepLuaGear(current), _luaWidgets: normalizeWidgetOrder(current._luaWidgets), _luaLook: "custom" })); }}><strong>{style.label}</strong><small>{style.note}</small>{avatarStyle === style.id && <Check />}</button>)}</div>
+          <button className="button button-ghost avatar-random-button" onClick={() => { setAvatarSeed(randomSeed()); setAvatarConfig((current) => ({ ...keepLuaGear(current), _luaWidgets: normalizeWidgetOrder(current._luaWidgets), _luaLook: "custom" })); }}><Dices /> Outra combinação</button>
         </section>
 
         <section className="profile-editor-card lua-gear-card">
@@ -119,6 +178,16 @@ export function ProfileView({ user, onLogin }: { user: SessionUser | null; onLog
         <button className="button button-primary profile-save" disabled={save.isPending || displayName.trim().length < 2 || profileTitle.trim().length < 2} onClick={() => save.mutate()}>{save.isPending ? <LoaderCircle className="spin" /> : <Save />} Salvar Mega Perfil</button>
       </div>
     </section>
+  </div>;
+}
+
+function SortableProfileWidget({ id, index }: { id: ProfileWidgetId; index: number }) {
+  const sortable = useSortable({ id, index });
+  const meta = PROFILE_WIDGET_META[id];
+  return <div ref={sortable.ref} className={`profile-layout-item${sortable.isDragging ? " dragging" : ""}`}>
+    <span className="profile-layout-grip"><GripVertical /></span>
+    <div><strong>{meta.label}</strong><small>{meta.note}</small></div>
+    <span className="profile-layout-order">{index + 1}</span>
   </div>;
 }
 
