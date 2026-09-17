@@ -107,7 +107,7 @@ export default function App() {
     </main>
 
     <footer className="site-footer">
-      <div className="page-width footer-inner"><Brand compact /><p>Aprender, criar e descobrir em uma experiência feita para a turma.</p><div><button onClick={() => go("explore")}><BookOpen /> Fontes educacionais</button><span>Rede Lua na educação • 2026</span></div></div>
+      <div className="page-width footer-inner"><Brand compact /><p>Quiz, jogo e aprendizado com a cara da sua turma.</p><div><button onClick={() => go("explore")}><BookOpen /> Fontes educacionais</button><span>Rede Lua na educação • 2026</span></div></div>
     </footer>
 
     <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} preferredRole={preferredRole} />

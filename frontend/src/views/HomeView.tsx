@@ -1,5 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, BarChart3, BrainCircuit, CheckCircle2, Gamepad2, GraduationCap, LibraryBig, MoonStar, Palette, Search, ShieldCheck, Sparkles, Trophy, UserRound, Users } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  CheckCircle2,
+  Gamepad2,
+  GraduationCap,
+  LibraryBig,
+  MessageCircle,
+  MoonStar,
+  Palette,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Trophy,
+  UserRound,
+  Users,
+} from "lucide-react";
 import { api } from "../api";
 import { reactionAssets } from "../assets";
 
@@ -8,104 +24,118 @@ export function HomeView({ code, setCode, onJoin, onTeacher, onExplore, onStuden
 
   return (
     <>
-      <section className="home-hero page-width lunar-hero core-hero">
-        <div className="hero-copy">
-          <span className="eyebrow"><MoonStar size={16} /> a sala virou um universo de aprendizagem</span>
-          <h1>Aprender com uma plataforma que <em>entende o ritmo</em> da turma.</h1>
-          <p className="hero-lead">Quizzes, minigames e trilhas que acompanham cada turma. Professores criam do seu jeito e alunos avançam no próprio ritmo.</p>
-          <div className="join-panel lunar-ticket">
-            <div className="join-panel-copy"><span>Bilhete de entrada</span><small>Recebeu um código da turma? Entre direto na missão, até sem criar conta.</small></div>
-            <div className="join-panel-controls">
+      <section className="page-width home-hero human-hero">
+        <div className="hero-copy human-hero-copy">
+          <span className="eyebrow"><MoonStar size={16} /> feito para aulas de verdade</span>
+          <h1>Quiz, risada, disputa e <em>aprendizado</em> na mesma aula.</h1>
+          <p className="hero-lead">O professor cria a atividade, a turma entra com um código e pronto. Dá para jogar, reagir, ganhar XP e descobrir o que vale revisar depois.</p>
+
+          <div className="quick-join-card">
+            <div>
+              <span className="quick-join-label">Já tem um código?</span>
+              <strong>Entra na partida 👇</strong>
+            </div>
+            <div className="quick-join-controls">
               <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 9))} onKeyDown={(e) => e.key === "Enter" && onJoin()} placeholder="LUA-4821" aria-label="Código da partida" />
               <button onClick={onJoin}>Entrar <ArrowRight /></button>
             </div>
           </div>
-          <div className="hero-actions">
-            <button className="button button-primary" onClick={onTeacher}><GraduationCap /> Área do professor</button>
-            <button className="button button-ghost" onClick={onStudent}><Sparkles /> Minha Constelação</button>
+
+          <div className="hero-actions human-actions">
+            <button className="button button-primary" onClick={onTeacher}><GraduationCap /> Quero criar uma atividade</button>
+            <button className="button button-ghost" onClick={onStudent}><UserRound /> Ver meu perfil</button>
           </div>
-          <div className="trust-row"><span><ShieldCheck /> dados protegidos</span><span><CheckCircle2 /> sem anúncios</span><span><Users /> progresso que faz sentido</span></div>
+
+          <div className="human-trust-row">
+            <span><CheckCircle2 /> funciona no celular</span>
+            <span><ShieldCheck /> sem anúncios</span>
+            <span><Sparkles /> perfil do seu jeito</span>
+          </div>
         </div>
 
-        <div className="hero-constellation" aria-label="Identidade Rede Lua">
-          <span className="orbit orbit-one" /><span className="orbit orbit-two" />
-          <span className="star star-a">✦</span><span className="star star-b">✦</span><span className="star star-c">•</span>
-          <img className="hero-logo" src="/assets/rede-lua/brand/logo-transparent.webp" alt="Rede Lua na Educação" />
-          <div className="floating-chip chip-search"><Search /><span><b>Busca Lunar</b>ache atividades</span></div>
-          <div className="floating-chip chip-brain"><BrainCircuit /><span><b>No seu ritmo</b>trilhas que mudam</span></div>
-          <div className="floating-chip chip-score"><Trophy /><span><b>+ XP</b>avance aprendendo</span></div>
-        </div>
-      </section>
+        <div className="classroom-playground" aria-label="Exemplo divertido de uma partida Rede Lua">
+          <div className="playground-topline"><span>EXEMPLO DE UMA PARTIDA</span><b>História • valendo 200 XP</b></div>
+          <img className="playground-logo" src="/assets/rede-lua/brand/logo-transparent.webp" alt="Rede Lua na Educação" />
 
-      <section className="signal-strip intelligence-strip">
-        <div className="page-width signal-grid">
-          <strong>Feita para transformar a aula em experiência</strong>
-          <span><Gamepad2 /> Quizzes</span><span><Search /> Busca rápida</span><span><UserRound /> Perfis</span><span><Palette /> Minigames</span>
-        </div>
-      </section>
+          <div className="chat-bubble teacher-bubble"><GraduationCap /><span><small>Professor</small><strong>Valendo! 👀</strong></span></div>
+          <div className="chat-bubble student-bubble"><MessageCircle /><span><small>Aluno</small><strong>AGORA EU SEI KKK</strong></span></div>
 
-      <section className="page-width home-block lunar-system-block">
-        <div className="section-kicker"><span>01</span><p>Tudo pensado para aprender sem complicar</p></div>
-        <div className="intelligence-grid core-grid">
-          <article className="intelligence-card supabase-card"><span className="system-number">A</span><Users /><h2>Tudo em um só lugar</h2><p>Conta, atividades, partidas e progresso ficam conectados para professor e aluno não perderem tempo pulando entre ferramentas.</p><small>CONTA • ATIVIDADES • PROGRESSO</small></article>
-          <article className="intelligence-card core-search-card"><span className="system-number">B</span><Search /><h2>Encontre o que precisa</h2><p>Pesquise por matéria, assunto ou palavra e encontre rapidamente atividades que combinam com o momento da turma.</p><small>PESQUISA • MATÉRIAS • DESCOBERTAS</small></article>
-          <article className="intelligence-card core-mastery-card"><span className="system-number">C</span><BrainCircuit /><h2>Cada aluno no próprio ritmo</h2><p>As respostas ajudam a mostrar o que já está forte, o que precisa de reforço e qual pode ser o próximo desafio.</p><small>RITMO • REFORÇO • DESAFIO</small></article>
-          <article className="intelligence-card core-pulse-card"><span className="system-number">D</span><ShieldCheck /><h2>Privacidade desde o começo</h2><p>A Rede Lua usa apenas o necessário para a experiência funcionar e evita transformar a aprendizagem em publicidade.</p><small>PRIVACIDADE • CONTROLE • TRANQUILIDADE</small></article>
+          <div className="playground-question">
+            <span>Pergunta 3 de 8</span>
+            <strong>Qual desses acontecimentos veio primeiro?</strong>
+            <div className="playground-answers"><i>A</i><i>B</i><i className="picked">C ✓</i><i>D</i></div>
+          </div>
+
+          <div className="playground-reactions">
+            {reactionAssets.slice(0, 6).map((item, index) => <img key={item.id} className={`reaction-float reaction-${index + 1}`} src={item.src} alt={item.label} />)}
+          </div>
         </div>
       </section>
 
-      <section className="page-width home-block signature-systems">
-        <div className="section-kicker"><span>02</span><p>Três espaços com personalidade própria</p></div>
-        <div className="signature-system-grid">
-          <article className="signature-card teacher-signature forge-signature">
-            <div className="signature-top"><span>PARA PROFESSORES</span><GraduationCap /></div>
-            <strong>Forja Lunar</strong>
-            <p>Guarde suas melhores perguntas e reaproveite quando quiser. Você cria uma vez e monta novas missões muito mais rápido.</p>
-            <div className="signature-pills"><span>Perguntas salvas</span><span>Organização</span><span>Reutilização</span></div>
-            <button onClick={onTeacher}>Abrir a Forja <ArrowRight /></button>
-          </article>
-
-          <article className="signature-card teacher-signature radar-signature">
-            <div className="signature-top"><span>PARA PROFESSORES</span><BarChart3 /></div>
-            <strong>Radar de Aprendizagem</strong>
-            <p>Veja onde a turma mais errou, quais assuntos estão indo bem e quem pode precisar de uma ajuda extra.</p>
-            <div className="signature-pills"><span>Visão da turma</span><span>Dificuldades</span><span>Próximos passos</span></div>
-            <button onClick={onTeacher}>Ver o Radar <ArrowRight /></button>
-          </article>
-
-          <article className="signature-card student-signature constellation-signature">
-            <div className="signature-top"><span>PARA ALUNOS</span><Sparkles /></div>
-            <strong>Constelação do Aluno</strong>
-            <p>Uma trilha que muda com você, com missões para reforçar, descobrir assuntos novos e encarar desafios.</p>
-            <div className="signature-pills"><span>Missões</span><span>XP</span><span>Progresso</span></div>
-            <button onClick={onStudent}>Abrir minha Constelação <ArrowRight /></button>
-          </article>
+      <section className="friendly-strip">
+        <div className="page-width friendly-strip-inner">
+          <strong>Sem enrolação: cria, manda o código e joga.</strong>
+          <span><Gamepad2 /> quiz e minigame</span>
+          <span><Palette /> tema da sua turma</span>
+          <span><Trophy /> XP e ranking</span>
+          <span><MessageCircle /> reações ao vivo</span>
         </div>
       </section>
 
-      <section className="page-width home-block personalized-block">
-        <div className="section-kicker"><span>03</span><p>Uma página que acompanha seu jeito de aprender</p></div>
-        <div className="personalized-head"><div><span className="eyebrow"><Sparkles size={16} /> escolhido para você</span><h2>{recommended.data?.personalized ? "Sugestões para continuar de onde você parou." : "Descubra sua próxima missão."}</h2></div><span className="engine-pill">Para você</span></div>
+      <section className="page-width home-block human-section">
+        <div className="human-section-head">
+          <span>Como funciona</span>
+          <h2>Uma aula inteira em poucos passos.</h2>
+          <p>Sem tutorial gigante. O fluxo foi pensado para dar para entender batendo o olho.</p>
+        </div>
+        <div className="human-steps">
+          <article><span>1</span><GraduationCap /><strong>O professor monta</strong><p>Escreve as perguntas, escolhe o tema e deixa tudo com a cara da turma.</p></article>
+          <article><span>2</span><Users /><strong>A turma entra</strong><p>Todo mundo usa o mesmo código. Nem precisa criar conta para participar da partida.</p></article>
+          <article><span>3</span><Gamepad2 /><strong>A sala joga</strong><p>Tem pontuação, reações, ranking e modos diferentes para não cair sempre no mesmo formato.</p></article>
+          <article><span>4</span><BookOpen /><strong>Depois fica mais fácil revisar</strong><p>O professor consegue ver quais perguntas apertaram mais e planejar a próxima aula.</p></article>
+        </div>
+      </section>
+
+      <section className="page-width home-block fun-block">
+        <div className="human-section-head">
+          <span>Não é só responder pergunta</span>
+          <h2>Tem espaço para deixar a aula com personalidade.</h2>
+        </div>
+        <div className="fun-grid">
+          <article className="fun-card avatar-fun"><div className="fun-icon"><UserRound /></div><strong>Perfil que parece seu</strong><p>Avatar, cabelo, óculos, robô, pirata, gamer, moldura e um monte de combinações.</p><button onClick={onStudent}>Montar meu perfil <ArrowRight /></button></article>
+          <article className="fun-card theme-fun"><div className="fun-icon"><Palette /></div><strong>Cada quiz com uma cara</strong><p>Troque cores, logo, fundo e estilo. Uma aula de Ciências não precisa parecer igual à de História.</p><button onClick={onTeacher}>Criar meu quiz <ArrowRight /></button></article>
+          <article className="fun-card reaction-fun"><div className="mini-reaction-line">{reactionAssets.slice(0, 4).map((item) => <img key={item.id} src={item.src} alt={item.label} />)}</div><strong>A turma pode reagir</strong><p>Acertou? Errou feio? Ficou em choque? Dá para reagir durante a partida sem parar o jogo.</p><button onClick={() => { setCode(""); onJoin(); }}>Ver partidas <ArrowRight /></button></article>
+        </div>
+      </section>
+
+      <section className="page-width home-block teacher-real-life">
+        <div className="teacher-real-copy">
+          <span className="eyebrow"><GraduationCap size={16} /> para quem está na frente da turma</span>
+          <h2>Professor não precisa virar designer nem programador.</h2>
+          <p>Crie uma atividade, reaproveite perguntas antigas e veja onde a turma travou. O resto fica no caminho, não na sua frente.</p>
+          <div className="teacher-real-points"><span>✓ duplicar quiz pronto</span><span>✓ guardar perguntas boas</span><span>✓ acompanhar erros da turma</span></div>
+          <button className="button button-primary" onClick={onTeacher}>Abrir área do professor <ArrowRight /></button>
+        </div>
+        <div className="teacher-note-stack">
+          <div className="paper-note note-one"><small>HOJE</small><strong>Revisar Revolução Industrial</strong><span>“A questão 4 confundiu metade da turma.”</span></div>
+          <div className="paper-note note-two"><small>AMANHÃ</small><strong>Duplicar o quiz e trocar 2 perguntas</strong><span>Pronto. Sem começar tudo do zero.</span></div>
+          <div className="paper-note note-three"><Sparkles /><strong>Boa!</strong><span>Material salvo para usar de novo.</span></div>
+        </div>
+      </section>
+
+      <section className="page-width home-block personalized-block human-recommendations">
+        <div className="human-section-head compact-head">
+          <span>Quer jogar alguma coisa?</span>
+          <h2>{recommended.data?.personalized ? "Separei algumas atividades para você." : "Olha o que já dá para explorar."}</h2>
+        </div>
         <div className="recommendation-row">
-          {recommended.isLoading ? Array.from({ length: 3 }).map((_, i) => <article className="recommendation-card skeleton-card" key={i} />) : recommended.data?.activities.length ? recommended.data.activities.slice(0, 4).map((item, i) => <button className="recommendation-card" key={item.id} onClick={() => { api.trackActivity(item.id, "view"); onExplore(); }}><span className="recommendation-index">0{i + 1}</span><small>{item.subject} • {item.difficulty === "easy" ? "leve" : item.difficulty === "hard" ? "desafio" : "médio"}</small><strong>{item.title}</strong><p>{item.description || "Uma atividade da comunidade Rede Lua."}</p><span className="card-arrow"><ArrowRight /></span></button>) : <article className="recommendation-empty"><LibraryBig /><strong>As sugestões aparecem conforme a Rede Lua ganha atividades.</strong><p>Quando professores publicarem novas missões, você verá aqui opções que combinam com seus estudos.</p><button className="button button-ghost" onClick={onExplore}>Explorar atividades</button></article>}
+          {recommended.isLoading ? Array.from({ length: 3 }).map((_, i) => <article className="recommendation-card skeleton-card" key={i} />) : recommended.data?.activities.length ? recommended.data.activities.slice(0, 4).map((item, i) => <button className="recommendation-card human-recommendation-card" key={item.id} onClick={() => { api.trackActivity(item.id, "view"); onExplore(); }}><span className="recommendation-index">0{i + 1}</span><small>{item.subject} • {item.difficulty === "easy" ? "leve" : item.difficulty === "hard" ? "desafio" : "médio"}</small><strong>{item.title}</strong><p>{item.description || "Uma atividade pronta para entrar e jogar."}</p><span className="card-arrow"><ArrowRight /></span></button>) : <article className="recommendation-empty"><LibraryBig /><strong>A biblioteca ainda está começando.</strong><p>Quando os professores publicarem atividades, elas aparecem aqui.</p><button className="button button-ghost" onClick={onExplore}>Explorar atividades</button></article>}
         </div>
       </section>
 
-      <section className="page-width home-block classroom-story">
-        <div className="section-kicker"><span>04</span><p>Uma aula completa em três momentos</p></div>
-        <div className="story-board">
-          <article><span>01</span><GraduationCap /><strong>Crie a missão</strong><p>Monte perguntas, escolha o visual e deixe a atividade com a cara da turma.</p></article>
-          <ArrowRight className="story-arrow" />
-          <article><span>02</span><Gamepad2 /><strong>Jogue com a turma</strong><p>Um código curto coloca todo mundo na mesma partida.</p></article>
-          <ArrowRight className="story-arrow" />
-          <article><span>03</span><Trophy /><strong>Acompanhe a evolução</strong><p>Veja os resultados e descubra qual pode ser o próximo passo.</p></article>
-        </div>
-        <div className="reaction-ribbon">{reactionAssets.slice(0, 8).map((item) => <img key={item.id} src={item.src} alt={item.label} />)}</div>
-      </section>
-
-      <section className="page-width home-block closing-card lunar-closing">
-        <div><span className="eyebrow"><Sparkles size={16} /> Rede Lua na Educação</span><h2>Cada turma pode ter uma experiência que parece feita para ela.</h2><p>Avatares, temas, logos, minigames, missões e trilhas deixam aprender e ensinar mais divertido sem perder a simplicidade.</p></div>
-        <button className="button button-light" onClick={onTeacher}>Criar uma missão <ArrowRight /></button>
+      <section className="page-width home-block human-closing">
+        <div className="human-closing-copy"><span>🌙 Rede Lua na Educação</span><h2>A aula continua sendo da turma. A tecnologia só ajuda a deixar tudo mais vivo.</h2><p>Comece simples: crie uma atividade ou entre numa partida com um código.</p></div>
+        <div className="human-closing-actions"><button className="button button-light" onClick={onTeacher}>Criar atividade <ArrowRight /></button><button className="button button-ghost closing-ghost" onClick={onExplore}><Search /> Explorar</button></div>
       </section>
     </>
   );
