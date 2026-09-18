@@ -2,7 +2,7 @@ export type Role = "student" | "teacher" | "admin";
 export type Difficulty = "easy" | "medium" | "hard";
 export type ExperienceMode = "classic" | "lunar_rush" | "star_hunt" | "focus" | "boss_battle" | "treasure_hunt" | "space_race" | "card_duel";
 export type QuestionType = "single" | "true_false";
-export type AvatarStyle = "adventurer" | "avataaars" | "personas" | "lorelei" | "notionists" | "bottts" | "pixel-art" | "big-smile" | "fun-emoji" | "croodles" | "micah";
+export type AvatarStyle = "lua-mates" | "adventurer" | "avataaars" | "personas" | "lorelei" | "notionists" | "bottts" | "pixel-art" | "big-smile" | "fun-emoji" | "croodles" | "micah";
 
 export type AvatarConfig = Record<string, string | number | boolean | string[]>;
 
@@ -316,7 +316,7 @@ export type CosmeticCatalogItem = {
   id: string;
   label: string;
   note: string;
-  kind: "head" | "face" | "aura" | "frame" | "theme";
+  kind: "head" | "face" | "aura" | "frame" | "theme" | "species" | "outfit" | "companion" | "expression" | "background";
   value: string;
   cost: number;
   level: number;

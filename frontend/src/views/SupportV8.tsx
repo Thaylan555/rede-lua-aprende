@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowRight, Building2, CheckCircle2, LifeBuoy, LoaderCircle, Mail, MessageCircle, ShieldCheck } from "lucide-react";
+import { ArrowRight, Building2, CheckCircle2, LifeBuoy, LoaderCircle, Mail, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "../api";
 import type { ContactPayload, SessionUser } from "../types";
@@ -21,7 +21,6 @@ export function SupportV8({ user }: { user: SessionUser | null }) {
         <article><LifeBuoy /><div><span>SUPORTE</span><strong>support@redelua.xyz</strong><p>Conta, acesso, bugs e ajuda com a plataforma.</p></div></article>
         <article><MessageCircle /><div><span>CONTATO</span><strong>contato@redelua.xyz</strong><p>Parcerias, ideias, imprensa e contato geral.</p></div></article>
         <article><Building2 /><div><span>ESCOLAS</span><strong>escolas@redelua.xyz</strong><p>Apresentação, implantação e uso em sala.</p></div></article>
-        <div className="v8-mail-note"><ShieldCheck /><span><strong>Endereços do seu próprio domínio</strong><small>Depois de configurar o roteamento de e-mail, tudo chega na caixa que você escolher.</small></span></div>
       </div>
 
       <form className="v8-support-form" onSubmit={(e) => { e.preventDefault(); send.mutate(); }}>

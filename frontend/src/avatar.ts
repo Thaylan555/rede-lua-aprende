@@ -1,6 +1,7 @@
 import type { AvatarConfig, AvatarStyle, ProfileTheme } from "./types";
 
 export const AVATAR_STYLES: Array<{ id: AvatarStyle; label: string; note: string }> = [
+  { id: "lua-mates", label: "LuaMates", note: "Mascotes originais da Rede Lua: animais, robôs e criaturas." },
   { id: "adventurer", label: "Cartoon", note: "Expressivo e leve para montar do seu jeito." },
   { id: "avataaars", label: "Street", note: "Meio-corpo com roupas, cabelo e acessórios." },
   { id: "personas", label: "Personas", note: "Visual moderno, simples e colorido." },
@@ -24,6 +25,11 @@ export type AvatarKit = {
 };
 
 export const AVATAR_KITS: AvatarKit[] = [
+  { id: "capivara-lunar", label: "Capivara Lunar", tagline: "Mascote tranquilo com cara de Rede Lua.", style: "lua-mates", config: { _luaSpecies: "lunar-capybara", _luaExpression: "happy", _luaOutfit: "academy", _luaCompanion: "book-sprite", _luaHead: "scholar-cap", _luaAura: "stars", _luaFrame: "royal" }, theme: { accent: "#ffca43", surface: "#174b91", background: "#071c45", card: "#fffaf0", pattern: "stars" } },
+  { id: "dragao-arcade", label: "Dragão Arcade", tagline: "Criatura de game com energia neon.", style: "lua-mates", config: { _luaSpecies: "pocket-dragon", _luaExpression: "confident", _luaOutfit: "arcade", _luaCompanion: "star-buddy", _luaHead: "headset", _luaAura: "pixels", _luaFrame: "arcade" }, theme: { accent: "#35f2b5", surface: "#7447e7", background: "#090c22", card: "#fffdf6", pattern: "grid" } },
+  { id: "pinguim-cientista", label: "Pinguim Cientista", tagline: "Laboratório, curiosidade e um livro vivo.", style: "lua-mates", config: { _luaSpecies: "cosmic-penguin", _luaExpression: "curious", _luaOutfit: "science", _luaCompanion: "book-sprite", _luaHead: "scholar-cap", _luaFace: "round-glasses", _luaAura: "cosmic", _luaFrame: "frost" }, theme: { accent: "#65e9ff", surface: "#244a80", background: "#081a34", card: "#f8fdff", pattern: "orbit" } },
+  { id: "raposa-pirata", label: "Raposa Pirata", tagline: "Aventura, mapa e tapa-olho sem copiar ninguém.", style: "lua-mates", config: { _luaSpecies: "nebula-fox", _luaExpression: "confident", _luaOutfit: "pirate", _luaCompanion: "mini-moon", _luaHead: "pirate-hat", _luaFace: "eyepatch", _luaAura: "comet", _luaFrame: "pirate" }, theme: { accent: "#ffc83d", surface: "#273a69", background: "#10182f", card: "#fff9ea", pattern: "stars" } },
+  { id: "axolote-prisma", label: "Axolote Prisma", tagline: "Fofo, estranho e impossível de confundir.", style: "lua-mates", config: { _luaSpecies: "prism-axolotl", _luaExpression: "surprised", _luaOutfit: "space", _luaCompanion: "planet-buddy", _luaHead: "classic-crown", _luaFace: "prism-glasses", _luaAura: "hearts", _luaFrame: "candy" }, theme: { accent: "#ff6fb5", surface: "#6a4cd5", background: "#221249", card: "#fff7fc", pattern: "orbit" } },
   { id: "pirata-lunar", label: "Pirata Lunar", tagline: "Tapa-olho, chapéu e clima de aventura.", style: "avataaars", config: { _luaHead: "pirate-hat", _luaFace: "eyepatch", _luaAura: "stars", _luaFrame: "pirate" }, theme: { accent: "#ffc83d", surface: "#12274c", background: "#07162f", card: "#fffaf0", pattern: "stars" } },
   { id: "robo-neon", label: "Robô Neon", tagline: "Metal, luzes e energia futurista.", style: "bottts", config: { _luaHead: "robot-antenna", _luaFace: "none", _luaAura: "neon", _luaFrame: "tech" }, theme: { accent: "#39e4ff", surface: "#172756", background: "#080d25", card: "#f6fbff", pattern: "grid" } },
   { id: "gamer-pixel", label: "Gamer Pixel", tagline: "Headset e visual de jogo retrô.", style: "pixel-art", config: { _luaHead: "headset", _luaFace: "none", _luaAura: "pixels", _luaFrame: "arcade" }, theme: { accent: "#ffcf3e", surface: "#6a44dc", background: "#181036", card: "#fffdf5", pattern: "grid" } },
@@ -34,18 +40,42 @@ export const AVATAR_KITS: AvatarKit[] = [
   { id: "caderno-vivo", label: "Caderno Vivo", tagline: "Doodle criativo para quem gosta de desenhar e inventar.", style: "croodles", config: { _luaHead: "street-cap", _luaFace: "star-glasses", _luaAura: "pixels", _luaFrame: "arcade" }, theme: { accent: "#ffd54a", surface: "#1f6d5b", background: "#0c2d2a", card: "#fffdf1", pattern: "grid" } },
 ];
 
+export const LUA_MATE_SPECIES = [
+  ["moon-bear", "Urso Lunar", "🐻"], ["nebula-fox", "Raposa Nebular", "🦊"], ["cosmic-penguin", "Pinguim Cósmico", "🐧"],
+  ["lunar-capybara", "Capivara Lunar", "🟤"], ["wise-owl", "Coruja Sábia", "🦉"], ["pocket-dragon", "Dragão de Bolso", "🐲"],
+  ["orbit-robot", "Robô Órbita", "🤖"], ["astro-cat", "Gato Astro", "🐱"], ["prism-axolotl", "Axolote Prisma", "🩷"],
+  ["star-bunny", "Coelho Estelar", "🐰"], ["comet-monkey", "Macaco Cometa", "🐵"], ["cloud-yeti", "Yeti Nuvem", "☁️"],
+] as const;
+
+export const LUA_EXPRESSIONS = [
+  ["happy", "Feliz", "😄"], ["curious", "Curioso", "🤔"], ["confident", "Confiante", "😏"], ["surprised", "Surpreso", "😮"],
+] as const;
+
+export const LUA_OUTFITS = [
+  ["academy", "Academia Lunar", "🎒"], ["space", "Explorador Espacial", "🚀"], ["science", "Laboratório", "🧪"], ["arcade", "Arcade", "🎮"], ["pirate", "Aventura Pirata", "🏴‍☠️"],
+] as const;
+
+export const LUA_COMPANIONS = [
+  ["none", "Sem companheiro", "—"], ["mini-moon", "Mini Lua", "🌙"], ["book-sprite", "Livro Vivo", "📘"], ["mini-rocket", "Mini Foguete", "🚀"],
+  ["star-buddy", "Estrelinha", "⭐"], ["robot-pet", "Robô Pet", "🤖"], ["frog-orbit", "Sapo Órbita", "🐸"], ["planet-buddy", "Planetinha", "🪐"], ["pencil-sprite", "Lápis Vivo", "✏️"],
+] as const;
+
+export const LUA_BACKDROPS = [
+  ["stars", "Céu Estelar"], ["orbit", "Órbita"], ["grid", "Arcade"], ["plain", "Limpo"],
+] as const;
+
 export const LUA_GEAR = {
   head: [
-    ["none", "Sem item"], ["pirate-hat", "Chapéu pirata"], ["headset", "Headset gamer"], ["wizard-hat", "Chapéu de mago"], ["street-cap", "Boné street"], ["robot-antenna", "Antena robô"], ["comet-crown", "Coroa Cometa"],
+    ["none", "Sem item"], ["pirate-hat", "Chapéu pirata"], ["headset", "Headset gamer"], ["wizard-hat", "Chapéu de mago"], ["street-cap", "Boné street"], ["robot-antenna", "Antena robô"], ["comet-crown", "Coroa Cometa"], ["cowboy-hat", "Chapéu cowboy"], ["top-hat", "Cartola"], ["classic-crown", "Coroa clássica"], ["pancake-stack", "Torre de panquecas"], ["flower-crown", "Coroa de flores"], ["scholar-cap", "Capelo"], ["party-hat", "Chapéu de festa"], ["winter-beanie", "Gorro"],
   ],
   face: [
-    ["none", "Sem item"], ["eyepatch", "Tapa-olho"], ["neon-visor", "Visor neon"], ["star-glasses", "Óculos estrela"], ["mask", "Máscara tech"], ["prism-glasses", "Óculos Prisma"],
+    ["none", "Sem item"], ["eyepatch", "Tapa-olho"], ["neon-visor", "Visor neon"], ["star-glasses", "Óculos estrela"], ["mask", "Máscara tech"], ["prism-glasses", "Óculos Prisma"], ["nerd-glasses", "Óculos nerd"], ["round-glasses", "Óculos redondo"], ["pixel-shades", "Óculos pixel"], ["moustache", "Bigode divertido"], ["monocle", "Monóculo"],
   ],
   aura: [
-    ["none", "Sem efeito"], ["stars", "Estrelas"], ["neon", "Neon"], ["pixels", "Pixels"], ["cosmic", "Órbita cósmica"], ["comet", "Rastro de Cometa"],
+    ["none", "Sem efeito"], ["stars", "Estrelas"], ["neon", "Neon"], ["pixels", "Pixels"], ["cosmic", "Órbita cósmica"], ["comet", "Rastro de Cometa"], ["confetti", "Confete"], ["hearts", "Corações"], ["snow", "Neve"], ["books", "Livros voando"],
   ],
   frame: [
-    ["none", "Clássica"], ["pirate", "Pirata"], ["tech", "Tech"], ["arcade", "Arcade"], ["cosmic", "Cósmica"], ["street", "Street"], ["quasar", "Quasar"],
+    ["none", "Clássica"], ["pirate", "Pirata"], ["tech", "Tech"], ["arcade", "Arcade"], ["cosmic", "Cósmica"], ["street", "Street"], ["quasar", "Quasar"], ["royal", "Real"], ["forest", "Floresta"], ["frost", "Gelo"], ["candy", "Doce"],
   ],
 } as const;
 
@@ -74,6 +104,7 @@ export type DiceBearOptions = Record<string, DiceBearOptionMeta>;
 const blockedKeys = new Set(["seed", "size", "radius", "backgroundType", "backgroundRotation", "randomizeIds"]);
 
 export function buildAvatarUrl(style: AvatarStyle, seed: string, config: AvatarConfig = {}, size = 320) {
+  if (style === "lua-mates") return "";
   const params = new URLSearchParams();
   params.set("seed", seed || "rede-lua");
   params.set("size", String(Math.max(64, Math.min(512, size))));
@@ -86,6 +117,7 @@ export function buildAvatarUrl(style: AvatarStyle, seed: string, config: AvatarC
 }
 
 export async function loadAvatarOptions(style: AvatarStyle): Promise<DiceBearOptions> {
+  if (style === "lua-mates") return {};
   const response = await fetch(`${DICEBEAR_API_BASE}/${style}/options.json`, { headers: { accept: "application/json" } });
   if (!response.ok) throw new Error("Não foi possível carregar as opções do avatar.");
   return response.json();

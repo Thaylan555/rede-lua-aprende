@@ -119,9 +119,46 @@ app.get("/discover/world", async (c) => {
 
 
 const approvedAvatarStyles = new Set([
-  "adventurer", "avataaars", "personas", "lorelei", "notionists", "bottts", "pixel-art",
+  "lua-mates", "adventurer", "avataaars", "personas", "lorelei", "notionists", "bottts", "pixel-art",
   "big-smile", "fun-emoji", "croodles", "micah", "thumbs", "shapes", "rings", "glass",
 ]);
+
+
+const luaMateCatalog = {
+  species: ["moon-bear","nebula-fox","cosmic-penguin","lunar-capybara","wise-owl","pocket-dragon","orbit-robot","astro-cat","prism-axolotl","star-bunny","comet-monkey","cloud-yeti"],
+  expressions: ["happy","curious","confident","surprised"],
+  outfits: ["academy","space","science","arcade","pirate"],
+  companions: ["none","mini-moon","book-sprite","mini-rocket","star-buddy","robot-pet","frog-orbit","planet-buddy","pencil-sprite"],
+};
+
+function tinyHash(value: string) {
+  let h = 2166136261;
+  for (let i = 0; i < value.length; i++) h = Math.imul(h ^ value.charCodeAt(i), 16777619);
+  return Math.abs(h >>> 0);
+}
+
+function escapeSvgText(value: string) {
+  return value.replace(/[&<>"']/g, (char) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&apos;" }[char] || char));
+}
+
+function luaMateSvg(seed: string, speciesInput?: string, expressionInput?: string, outfitInput?: string) {
+  const h = tinyHash(seed);
+  const species = luaMateCatalog.species.includes(speciesInput || "") ? speciesInput! : luaMateCatalog.species[h % luaMateCatalog.species.length];
+  const expression = luaMateCatalog.expressions.includes(expressionInput || "") ? expressionInput! : luaMateCatalog.expressions[h % luaMateCatalog.expressions.length];
+  const outfit = luaMateCatalog.outfits.includes(outfitInput || "") ? outfitInput! : luaMateCatalog.outfits[h % luaMateCatalog.outfits.length];
+  const palettes: Record<string,[string,string,string]> = {
+    "moon-bear":["#f5c24b","#d99c22","#ffe9aa"], "nebula-fox":["#f58a45","#c75b28","#fff0cf"], "cosmic-penguin":["#27365d","#101a36","#f7f5ed"],
+    "lunar-capybara":["#bd7a4f","#8c5030","#f4cf9f"], "wise-owl":["#b98bd9","#8056a8","#fff0c8"], "pocket-dragon":["#6dce72","#2b9b63","#d7ffd7"],
+    "orbit-robot":["#63d9ef","#2b75ba","#eefcff"], "astro-cat":["#f5b14a","#bd6f27","#fff0d1"], "prism-axolotl":["#ff91c2","#d85f9f","#ffe8f5"],
+    "star-bunny":["#d9d7ef","#9a91c8","#fff7fb"], "comet-monkey":["#c78557","#7c4934","#f2c49f"], "cloud-yeti":["#dbeaf5","#8cb5d0","#ffffff"]
+  };
+  const [body,accent,inner] = palettes[species] || palettes["moon-bear"];
+  const outfitColor = outfit === "arcade" ? "#7447e7" : outfit === "science" ? "#d7efff" : outfit === "space" ? "#21396d" : outfit === "pirate" ? "#7f3b32" : "#1a5db0";
+  const eye = expression === "happy" ? '<path d="M73 101q10-12 20 0M127 101q10-12 20 0" fill="none" stroke="#071c45" stroke-width="7" stroke-linecap="round"/>' : '<circle cx="83" cy="101" r="8" fill="#071c45"/><circle cx="139" cy="101" r="8" fill="#071c45"/>';
+  const mouth = expression === "surprised" ? '<ellipse cx="111" cy="133" rx="10" ry="13" fill="#7c2b3f" stroke="#071c45" stroke-width="4"/>' : expression === "curious" ? '<path d="M95 135q15-8 31 0" fill="none" stroke="#071c45" stroke-width="6" stroke-linecap="round"/>' : '<path d="M88 128q22 28 45 0" fill="#fff" stroke="#071c45" stroke-width="5"/>';
+  const ears = species.includes("fox") || species.includes("cat") ? `<path d="M59 67 47 28l39 29M161 67l12-39-39 29" fill="${body}" stroke="#071c45" stroke-width="7"/>` : species.includes("bunny") ? `<ellipse cx="76" cy="45" rx="18" ry="43" fill="${body}" stroke="#071c45" stroke-width="7"/><ellipse cx="144" cy="45" rx="18" ry="43" fill="${body}" stroke="#071c45" stroke-width="7"/>` : `<circle cx="64" cy="68" r="23" fill="${body}" stroke="#071c45" stroke-width="7"/><circle cx="156" cy="68" r="23" fill="${body}" stroke="#071c45" stroke-width="7"/>`;
+  return `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220" role="img" aria-label="LuaMate ${escapeSvgText(species)}"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eef7ff"/><stop offset="1" stop-color="#fff5cf"/></linearGradient></defs><rect x="6" y="6" width="208" height="208" rx="55" fill="url(#bg)"/>${ears}<ellipse cx="110" cy="186" rx="62" ry="26" fill="${outfitColor}" stroke="#071c45" stroke-width="6"/><rect x="48" y="50" width="124" height="114" rx="52" fill="${body}" stroke="#071c45" stroke-width="7"/><ellipse cx="110" cy="126" rx="34" ry="25" fill="${inner}" opacity=".86"/>${eye}<ellipse cx="111" cy="118" rx="7" ry="5" fill="${accent}"/>${mouth}<circle cx="42" cy="43" r="4" fill="#ffcf45"/><circle cx="179" cy="39" r="3" fill="#65e8ff"/></svg>`;
+}
 
 function requiredSupabase(c: any) {
   const url = c.env.SUPABASE_URL;
@@ -167,10 +204,23 @@ app.get("/luaid/profile/:handle", async (c) => {
   return c.json(result.data);
 });
 
+app.get("/luaid/avatar/catalog", (c) => {
+  c.header("Cache-Control", "public, max-age=3600, s-maxage=86400");
+  return c.json({ version: "lua-avatar.v1", engine: "Rede Lua + DiceBear", ...luaMateCatalog, styles: Array.from(approvedAvatarStyles) });
+});
+
 app.get("/luaid/avatar/:style/:seed.svg", async (c) => {
   const style = z.string().trim().regex(/^[a-z0-9-]{2,32}$/).parse(c.req.param("style"));
   const seed = z.string().trim().min(2).max(90).parse(c.req.param("seed"));
   if (!approvedAvatarStyles.has(style)) return c.json({ error: "STYLE_NOT_ALLOWED" }, 400);
+  if (style === "lua-mates") {
+    const species = c.req.query("species");
+    const expression = c.req.query("expression");
+    const outfit = c.req.query("outfit");
+    c.header("Content-Type", "image/svg+xml; charset=utf-8");
+    c.header("Cache-Control", "public, max-age=86400, s-maxage=604800");
+    return c.body(luaMateSvg(seed, species, expression, outfit));
+  }
   const url = new URL(`https://api.dicebear.com/10.x/${style}/svg`);
   url.searchParams.set("seed", seed);
   url.searchParams.set("radius", "22");

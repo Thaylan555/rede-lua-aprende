@@ -1,4 +1,5 @@
 import { buildAvatarUrl } from "../avatar";
+import { LuaMateAvatar } from "./LuaMateAvatar";
 import type { AvatarConfig, AvatarStyle } from "../types";
 
 type Props = {
@@ -18,13 +19,21 @@ export function AvatarVisual({ style, seed, config, size = 320, alt = "", compac
   const face = textValue(config, "_luaFace");
   const aura = textValue(config, "_luaAura");
   const frame = textValue(config, "_luaFrame");
+  const companion = textValue(config, "_luaCompanion");
 
   return <div className={`lua-avatar ${compact ? "lua-avatar-compact" : ""} aura-${aura} frame-${frame} ${className}`.trim()}>
-    <div className="lua-avatar-base"><img src={buildAvatarUrl(style, seed, config, size)} alt={alt} /></div>
+    <div className="lua-avatar-base">{style === "lua-mates" ? <LuaMateAvatar seed={seed} config={config} alt={alt} /> : <img src={buildAvatarUrl(style, seed, config, size)} alt={alt} />}</div>
     {!compact && aura !== "none" && <Aura kind={aura} />}
     {!compact && head !== "none" && <HeadGear kind={head} />}
     {!compact && face !== "none" && <FaceGear kind={face} />}
+    {!compact && companion !== "none" && <Companion kind={companion} />}
   </div>;
+}
+
+function Companion({ kind }: { kind: string }) {
+  const map: Record<string,string> = { "mini-moon":"🌙", "book-sprite":"📘", "mini-rocket":"🚀", "star-buddy":"⭐", "robot-pet":"🤖", "frog-orbit":"🐸", "planet-buddy":"🪐", "pencil-sprite":"✏️" };
+  if (!map[kind]) return null;
+  return <span className={`lua-companion companion-${kind}`} aria-hidden="true">{map[kind]}</span>;
 }
 
 function Aura({ kind }: { kind: string }) {
@@ -33,6 +42,10 @@ function Aura({ kind }: { kind: string }) {
   if (kind === "neon") return <div className="lua-aura lua-aura-neon" aria-hidden="true" />;
   if (kind === "cosmic") return <div className="lua-aura lua-aura-cosmic" aria-hidden="true"><i /><i /></div>;
   if (kind === "comet") return <div className="lua-aura lua-aura-comet" aria-hidden="true"><i /><i /><i /></div>;
+  if (kind === "confetti") return <div className="lua-aura lua-aura-confetti" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /><i /></div>;
+  if (kind === "hearts") return <div className="lua-aura lua-aura-hearts" aria-hidden="true"><span>♥</span><span>♥</span><span>♥</span></div>;
+  if (kind === "snow") return <div className="lua-aura lua-aura-snow" aria-hidden="true"><span>❄</span><span>❄</span><span>❄</span><span>❄</span></div>;
+  if (kind === "books") return <div className="lua-aura lua-aura-books" aria-hidden="true"><span>📘</span><span>📙</span><span>📗</span></div>;
   return null;
 }
 
@@ -69,6 +82,8 @@ function HeadGear({ kind }: { kind: string }) {
     <circle cx="31" cy="17" r="4" fill="#65e9ff" stroke="#071c45" strokeWidth="2" /><circle cx="50" cy="28" r="4" fill="#a477ff" stroke="#071c45" strokeWidth="2" /><circle cx="69" cy="17" r="4" fill="#ff6ba8" stroke="#071c45" strokeWidth="2" />
     <path d="M30 38c10 3 30 3 40 0" stroke="#fff3b0" strokeWidth="3" strokeLinecap="round" />
   </svg>;
+  const emojiHeads: Record<string,string> = { "cowboy-hat":"🤠", "top-hat":"🎩", "classic-crown":"👑", "pancake-stack":"🥞", "flower-crown":"🌸", "scholar-cap":"🎓", "party-hat":"🥳", "winter-beanie":"🧢" };
+  if (emojiHeads[kind]) return <span className={`lua-emoji-gear lua-emoji-head gear-${kind}`} aria-hidden="true">{emojiHeads[kind]}</span>;
   return null;
 }
 
@@ -95,5 +110,7 @@ function FaceGear({ kind }: { kind: string }) {
     <defs><linearGradient id="prismL" x1="0" x2="1"><stop stopColor="#65e9ff"/><stop offset=".5" stopColor="#a477ff"/><stop offset="1" stopColor="#ff6ba8"/></linearGradient></defs>
     <rect x="22" y="41" width="25" height="17" rx="6" fill="url(#prismL)" fillOpacity=".72" stroke="#071c45" strokeWidth="3"/><rect x="53" y="41" width="25" height="17" rx="6" fill="url(#prismL)" fillOpacity=".72" stroke="#071c45" strokeWidth="3"/><path d="M47 48h6" stroke="#071c45" strokeWidth="3"/><path d="M26 45l15 9M57 45l15 9" stroke="#fff" strokeWidth="2" opacity=".75"/>
   </svg>;
+  const emojiFaces: Record<string,string> = { "nerd-glasses":"🤓", "round-glasses":"👓", "pixel-shades":"😎", "moustache":"🥸", "monocle":"🧐" };
+  if (emojiFaces[kind]) return <span className={`lua-emoji-gear lua-emoji-face gear-${kind}`} aria-hidden="true">{emojiFaces[kind]}</span>;
   return null;
 }

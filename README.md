@@ -74,3 +74,6 @@ Migration:
 Ela adiciona sessões de estudo guiado, LuaID/handle, caixa de contato e o Studio v3.
 
 Veja também `EMAIL-REDE-LUA.md`, `ARCHITECTURE.md` e `RELEASE-v8.md`.
+
+## v8.1 — Avatar Revolution
+O LuaID agora inclui os **LuaMates**, mascotes originais da Rede Lua, um Avatar Studio em abas, companheiros, novas peças, efeitos, inventário e uma API própria de avatar. Veja `RELEASE-v8.1.md`.
