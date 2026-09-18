@@ -2,5 +2,9 @@ name = "rede-lua-educacao"
 compatibility_date = "2026-09-15"
 pages_build_output_dir = "frontend/dist"
 
-# LuaCore usa Supabase/PostgreSQL para busca, recomendação e analytics.
-# Configure SUPABASE_URL e SUPABASE_PUBLISHABLE_KEY no ambiente do Pages.
+# Configure no Cloudflare Pages:
+# SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY
+# SUPABASE_SERVICE_ROLE_KEY (secret, só backend)
+# RESEND_API_KEY (secret, opcional para envio do formulário)
+# CONTACT_TO_EMAIL / CONTACT_FROM_EMAIL
+# As VITE_* são variáveis de build do frontend.

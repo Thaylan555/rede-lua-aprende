@@ -1,58 +1,48 @@
-# Deploy da Rede Lua no Cloudflare Pages
+# Deploy — Cloudflare Pages • Rede Lua v8
 
-## 1. Supabase
+## Build
 
-O Supabase conectado é o núcleo do projeto. Não é necessário D1, R2, Qdrant, Meilisearch ou Matomo.
+```text
+Framework preset: None
+Build command: npm run build
+Build output directory: frontend/dist
+Root directory: vazio / raiz do repositório
+Production branch: main
+```
 
-Configure no frontend:
+## Variáveis de build do frontend
 
 ```env
 VITE_SUPABASE_URL=https://SEU-PROJETO.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+VITE_DICEBEAR_API_URL=https://api.dicebear.com/10.x
 ```
 
-Configure também nas Pages Functions:
+A publishable key pode ser usada no cliente com RLS. Não coloque service-role em variável `VITE_*`.
+
+## Variáveis das Pages Functions
 
 ```env
 SUPABASE_URL=https://SEU-PROJETO.supabase.co
 SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 ```
 
-## 2. Build
+Para o formulário de contato também guardar mensagens no Rede Lua Control, adicione como **Secret**:
 
-Comando:
-
-```bash
-npm install
-npm run typecheck
-npm run build
+```env
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_...
 ```
 
-Diretório de saída:
+Para o formulário também enviar e-mail:
 
-```text
-frontend/dist
+```env
+RESEND_API_KEY=re_...
+CONTACT_TO_EMAIL=support@redelua.xyz
+CONTACT_FROM_EMAIL=Rede Lua <contato@redelua.xyz>
 ```
 
-## 3. Domínio
+Depois de adicionar variáveis de build, faça um novo deploy porque o Vite lê `VITE_*` durante a compilação.
 
-No painel do Cloudflare Pages, abra **Custom domains**, adicione `aprende.redelua.xyz` e deixe o Cloudflare criar/validar o DNS.
+## Domínio
 
-## 4. LuaCore
-
-Nenhum container extra é necessário. Busca, recomendação, domínio e telemetria ficam no PostgreSQL/Supabase.
-
-- Busca: `rede_lua_search_activities`
-- Recomendação: `rede_lua_recommend_activities`
-- Analytics: `rede_lua_track_core_event`
-- Professor: `rede_lua_forge_questions` + `rede_lua_teacher_radar`
-- Aluno: `rede_lua_student_constellation`
-
-## 5. Checklist
-
-- HTTPS ativo no domínio.
-- `VITE_SUPABASE_*` configuradas no build.
-- RLS ativo no Supabase.
-- E-mail de confirmação do Supabase ajustado conforme sua preferência.
-- Primeiro professor validado por código de convite.
-- `npm run typecheck` e `npm run build` passando antes do deploy.
+Mantenha `redelua.xyz` / `www.redelua.xyz` ligados ao mesmo projeto Pages. Para os endereços de e-mail do domínio, siga `EMAIL-REDE-LUA.md`.

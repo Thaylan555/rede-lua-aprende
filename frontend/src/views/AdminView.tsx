@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Activity, Archive, BellRing, BookOpenCheck, Check, ClipboardCopy, Flag, GraduationCap, KeyRound, LoaderCircle, LockKeyhole, Megaphone, RefreshCcw, Search, ShieldCheck, ShoppingBag, Sparkles, ToggleLeft, ToggleRight, Users, WandSparkles } from "lucide-react";
+import { Activity, Archive, BellRing, BookOpenCheck, Check, ClipboardCopy, Flag, GraduationCap, KeyRound, LoaderCircle, LockKeyhole, Megaphone, RefreshCcw, Search, ShieldCheck, ShoppingBag, Sparkles, ToggleLeft, ToggleRight, Users, WandSparkles, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "../api";
 import { LumiMoment } from "../components/LumiMoment";
 import type { AdminAnnouncement, SessionUser } from "../types";
 
-type AdminTab = "overview" | "users" | "teachers" | "content" | "shop" | "announcements" | "features" | "audit";
+type AdminTab = "overview" | "users" | "teachers" | "content" | "shop" | "support" | "announcements" | "features" | "audit";
 
 const tabItems: Array<{ id: AdminTab; label: string; icon: typeof Users }> = [
   { id: "overview", label: "Visão geral", icon: Activity },
@@ -14,6 +14,7 @@ const tabItems: Array<{ id: AdminTab; label: string; icon: typeof Users }> = [
   { id: "teachers", label: "Professores", icon: GraduationCap },
   { id: "content", label: "Conteúdo", icon: BookOpenCheck },
   { id: "shop", label: "Loja", icon: ShoppingBag },
+  { id: "support", label: "Suporte", icon: Mail },
   { id: "announcements", label: "Avisos", icon: Megaphone },
   { id: "features", label: "Experimentos", icon: Flag },
   { id: "audit", label: "Auditoria", icon: ShieldCheck },
@@ -40,6 +41,7 @@ export function AdminView({ user }: { user: SessionUser | null }) {
   const invites = useQuery({ queryKey:["admin-invites"], queryFn:api.adminTeacherInvites, enabled:isAdmin && tab==="teachers", staleTime:10_000 });
   const activities = useQuery({ queryKey:["admin-activities",contentSearch], queryFn:()=>api.adminActivities(contentSearch), enabled:isAdmin && tab==="content", staleTime:10_000 });
   const shop = useQuery({ queryKey:["admin-cosmetics"], queryFn:api.adminCosmetics, enabled:isAdmin && tab==="shop", staleTime:10_000 });
+  const supportMessages = useQuery({ queryKey:["admin-support"], queryFn:api.adminContactMessages, enabled:isAdmin && tab==="support", staleTime:10_000 });
   const announcements = useQuery({ queryKey:["admin-announcements"], queryFn:api.adminAnnouncements, enabled:isAdmin && tab==="announcements", staleTime:10_000 });
   const flags = useQuery({ queryKey:["admin-flags"], queryFn:api.adminFlags, enabled:isAdmin && tab==="features", staleTime:10_000 });
   const audit = useQuery({ queryKey:["admin-audit"], queryFn:api.adminAuditLog, enabled:isAdmin && tab==="audit", staleTime:10_000 });
@@ -52,6 +54,7 @@ export function AdminView({ user }: { user: SessionUser | null }) {
       queryClient.invalidateQueries({ queryKey:["admin-activities"] }),
       queryClient.invalidateQueries({ queryKey:["admin-cosmetics"] }),
       queryClient.invalidateQueries({ queryKey:["cosmetic-catalog"] }),
+      queryClient.invalidateQueries({ queryKey:["admin-support"] }),
       queryClient.invalidateQueries({ queryKey:["admin-announcements"] }),
       queryClient.invalidateQueries({ queryKey:["admin-flags"] }),
       queryClient.invalidateQueries({ queryKey:["admin-audit"] }),
@@ -134,6 +137,11 @@ export function AdminView({ user }: { user: SessionUser | null }) {
     {tab==="shop" && <section className="admin-section">
       <div className="admin-section-head"><div><span>LOJA LUNAR</span><h2>Economia cosmética</h2><p>Ajuste preço, nível mínimo e disponibilidade sem alterar o código do site.</p></div><ShoppingBag/></div>
       <div className="admin-shop-grid">{shop.data?.map((item)=><article key={item.id} className={item.active===false?"disabled":""}><div className="admin-shop-icon">{item.emoji}</div><div><strong>{item.label}</strong><small>{item.kind} • {item.value}</small><p>{item.note}</p></div><label>Preço<input type="number" min={0} defaultValue={item.cost} onBlur={(e)=>{const cost=Math.max(0,Number(e.target.value)||0);if(cost!==item.cost)cosmeticMutation.mutate({id:item.id,cost,level:item.level,active:item.active!==false});}}/></label><label>Nível<input type="number" min={1} defaultValue={item.level} onBlur={(e)=>{const level=Math.max(1,Number(e.target.value)||1);if(level!==item.level)cosmeticMutation.mutate({id:item.id,cost:item.cost,level,active:item.active!==false});}}/></label><button className={item.active===false?"restore":"danger"} onClick={()=>cosmeticMutation.mutate({id:item.id,cost:item.cost,level:item.level,active:item.active===false})}>{item.active===false?<ToggleLeft/>:<ToggleRight/>}{item.active===false?"Ativar":"Pausar"}</button></article>)}</div>
+    </section>}
+
+    {tab==="support" && <section className="admin-section">
+      <div className="admin-section-head"><div><span>CAIXA DE ENTRADA</span><h2>Suporte e contato</h2><p>Mensagens enviadas pelo formulário da Rede Lua ficam reunidas aqui quando o backend de contato está configurado.</p></div><Mail/></div>
+      <div className="v8-support-inbox">{supportMessages.isLoading?<div className="source-status"><LoaderCircle className="spin"/> carregando…</div>:supportMessages.data?.length? supportMessages.data.map((item)=><article key={item.id}><div><span className={`v8-ticket-status status-${item.status}`}>{item.status}</span><strong>{item.name}</strong><a href={`mailto:${item.email}`}>{item.email}</a></div><small>{item.topic} • {new Date(item.createdAt).toLocaleString("pt-BR")}</small><p>{item.message}</p></article>):<div className="v8-empty-state"><Mail/><strong>Nenhuma mensagem por aqui ainda.</strong><span>Quando alguém usar a página de contato, ela aparece aqui.</span></div>}</div>
     </section>}
 
     {tab==="announcements" && <section className="admin-section admin-two-col">

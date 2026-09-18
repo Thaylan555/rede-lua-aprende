@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 import { trackEvent } from "./analytics";
 import { normalizeGameConfig, normalizeQuizTheme } from "./quizTheme";
-import type { Activity, AvatarConfig, AvatarStyle, Difficulty, DraftQuestion, ExperienceMode, ForgeQuestion, GameConfig, GameReaction, GameState, HostGame, ParticipantSession, ProfileTheme, PublicActivity, QuizTheme, Role, SessionResponse, SessionUser, StudentConstellation, TeacherRadar, CreatorProfile, SharedForgeQuestion, PlayerProfile, CosmeticsState, AdminDashboard, AdminUserRow, AdminAnnouncement, FeatureFlag, TeacherInviteAdmin, AdminAuditEntry, CosmeticCatalogItem, AdminActivityRow } from "./types";
+import type { Activity, AvatarConfig, AvatarStyle, Difficulty, DraftQuestion, ExperienceMode, ForgeQuestion, GameConfig, GameReaction, GameState, HostGame, ParticipantSession, ProfileTheme, PublicActivity, QuizTheme, Role, SessionResponse, SessionUser, StudentConstellation, TeacherRadar, CreatorProfile, SharedForgeQuestion, PlayerProfile, CosmeticsState, AdminDashboard, AdminUserRow, AdminAnnouncement, FeatureFlag, TeacherInviteAdmin, AdminAuditEntry, CosmeticCatalogItem, AdminActivityRow, StudyState, StudyAttemptResult, LuaIdManifest, ContactPayload, AdminContactMessage } from "./types";
 
 class ApiError extends Error {
   status: number;
@@ -67,7 +67,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 async function profileFor(user: { id: string; email?: string | null }): Promise<SessionUser> {
   const { data, error } = await supabase.from("rede_lua_profiles")
-    .select("display_name,role,xp,level,streak_days,bio,profile_title,avatar_style,avatar_seed,avatar_config,profile_theme,profile_visibility,favorite_subjects,moon_coins,account_status")
+    .select("display_name,role,xp,level,streak_days,bio,profile_title,avatar_style,avatar_seed,avatar_config,profile_theme,profile_visibility,favorite_subjects,moon_coins,account_status,profile_handle")
     .eq("user_id", user.id)
     .single();
   if (error) dbError(error);
@@ -89,6 +89,7 @@ async function profileFor(user: { id: string; email?: string | null }): Promise<
     favoriteSubjects: Array.isArray(data.favorite_subjects) ? data.favorite_subjects : [],
     moonCoins: Number(data.moon_coins || 0),
     accountStatus: (data.account_status || "active") as "active" | "suspended",
+    profileHandle: data.profile_handle || undefined,
   };
 }
 
@@ -236,7 +237,7 @@ export const api = {
   },
 
   createActivity: async (payload: { title: string; subject: string; description: string; status: "draft" | "published"; difficulty: Difficulty; tags: string[]; questions: DraftQuestion[]; experienceMode: ExperienceMode; theme: QuizTheme; gameConfig: GameConfig }) => {
-    const { data, error } = await supabase.rpc("rede_lua_create_activity_v2", {
+    const { data, error } = await supabase.rpc("rede_lua_create_activity_v3", {
       p_title: payload.title,
       p_subject: payload.subject,
       p_description: payload.description,
@@ -508,6 +509,55 @@ export const api = {
     const { data, error } = await supabase.rpc("rede_lua_admin_audit_log", { p_limit:80 });
     if (error) dbError(error);
     return (Array.isArray(data)?data:[]).map((item:any)=>({ id:Number(item.id),adminId:item.admin_id,adminName:item.admin_name||"Admin Rede Lua",action:item.action,targetType:item.target_type,targetId:item.target_id,details:item.details||{},createdAt:item.created_at }));
+  },
+  adminContactMessages: async (): Promise<AdminContactMessage[]> => {
+    const { data, error } = await supabase.rpc("rede_lua_admin_contact_messages", { p_limit:100 });
+    if (error) dbError(error);
+    return (Array.isArray(data)?data:[]).map((item:any)=>({ id:item.id,name:item.name,email:item.email,topic:item.topic,message:item.message,status:item.status,createdAt:item.createdAt||item.created_at }));
+  },
+
+  studyStart: async (activityId: string): Promise<StudyState> => {
+    const { data, error } = await supabase.rpc("rede_lua_study_start", { p_activity_id: activityId });
+    if (error) dbError(error);
+    trackEvent("learning", "study_start", activityId);
+    return data as StudyState;
+  },
+  studyState: async (sessionId: string): Promise<StudyState> => {
+    const { data, error } = await supabase.rpc("rede_lua_study_state", { p_session_id: sessionId });
+    if (error) dbError(error);
+    return data as StudyState;
+  },
+  studyAttempt: async (sessionId: string, choiceIndex: number, reflection = ""): Promise<StudyAttemptResult> => {
+    const { data, error } = await supabase.rpc("rede_lua_study_attempt", { p_session_id: sessionId, p_choice_index: choiceIndex, p_reflection: reflection });
+    if (error) dbError(error);
+    trackEvent("learning", "study_attempt", data?.correct ? "correct" : "retry");
+    return data as StudyAttemptResult;
+  },
+  studySkip: async (sessionId: string): Promise<StudyState> => {
+    const { data, error } = await supabase.rpc("rede_lua_study_skip", { p_session_id: sessionId });
+    if (error) dbError(error);
+    return data as StudyState;
+  },
+  setProfileHandle: async (handle: string) => {
+    const { data, error } = await supabase.rpc("rede_lua_set_profile_handle", { p_handle: handle });
+    if (error) dbError(error);
+    return { handle: String(data) };
+  },
+  luaIdManifest: async (): Promise<LuaIdManifest> => {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (!token) throw new ApiError("Entre para abrir seu LuaID.", 401, "AUTH_REQUIRED");
+    return request<LuaIdManifest>("/api/luaid/me", { headers: { Authorization: `Bearer ${token}` } });
+  },
+  publicLuaId: async (handle: string) => request<LuaIdManifest>(`/api/luaid/profile/${encodeURIComponent(handle)}`),
+  contact: async (payload: ContactPayload) => {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    return request<{ ok: true; stored: boolean; emailed: boolean }>("/api/contact", {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      body: JSON.stringify(payload),
+    });
   },
 
   books: (q: string) => request<{ books: Array<{ key: string; title: string; authors: string[]; year: number | null; coverUrl: string | null }> }>(`/api/discover/books?q=${encodeURIComponent(q)}`),

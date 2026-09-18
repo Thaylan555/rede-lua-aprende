@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import App from "./App";
 import "animate.css";
 import "./styles.css";
+import "./v8.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {

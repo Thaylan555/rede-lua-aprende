@@ -1,5 +1,15 @@
-# Cloudflare Pages Functions
-# LuaCore usa o Supabase diretamente para busca, recomendação e analytics.
-SUPABASE_URL=https://wpoftenqaeoliifrjsdr.supabase.co
-SUPABASE_PUBLISHABLE_KEY=sb_publishable_SUBSTITUA_PELA_CHAVE_PUBLICAVEL
+# Cloudflare Pages Functions — Rede Lua v8
+SUPABASE_URL=https://SEU-PROJETO.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+# SEGREDO: configure somente no servidor/Cloudflare, nunca como VITE_*
+SUPABASE_SERVICE_ROLE_KEY=sb_secret_...
+
+# Formulário de contato / envio de e-mail
+RESEND_API_KEY=re_...
+CONTACT_TO_EMAIL=support@redelua.xyz
+CONTACT_FROM_EMAIL=Rede Lua <contato@redelua.xyz>
+
+# Frontend (no Cloudflare Build Environment)
+VITE_SUPABASE_URL=https://SEU-PROJETO.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 VITE_DICEBEAR_API_URL=https://api.dicebear.com/10.x

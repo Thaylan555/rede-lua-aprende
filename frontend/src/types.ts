@@ -1,6 +1,6 @@
 export type Role = "student" | "teacher" | "admin";
 export type Difficulty = "easy" | "medium" | "hard";
-export type ExperienceMode = "classic" | "lunar_rush" | "star_hunt" | "focus";
+export type ExperienceMode = "classic" | "lunar_rush" | "star_hunt" | "focus" | "boss_battle" | "treasure_hunt" | "space_race" | "card_duel";
 export type QuestionType = "single" | "true_false";
 export type AvatarStyle = "adventurer" | "avataaars" | "personas" | "lorelei" | "notionists" | "bottts" | "pixel-art" | "big-smile" | "fun-emoji" | "croodles" | "micah";
 
@@ -55,6 +55,7 @@ export type SessionUser = {
   favoriteSubjects: string[];
   moonCoins: number;
   accountStatus: "active" | "suspended";
+  profileHandle?: string;
 };
 
 export type SessionResponse = {
@@ -334,3 +335,76 @@ export type AdminActivityRow = {
   questions: number;
   createdAt: string;
 };
+
+
+export type StudyQuestion = {
+  id: string;
+  prompt: string;
+  choices: string[];
+  hint: string;
+  mediaUrl: string | null;
+  questionType: QuestionType;
+  points: number;
+};
+
+export type StudyState = {
+  sessionId: string;
+  status: "active" | "completed" | "abandoned";
+  activityId: string;
+  title: string;
+  subject: string;
+  currentIndex: number;
+  questionCount: number;
+  correctCount: number;
+  totalAttempts: number;
+  attemptsOnQuestion?: number;
+  question: StudyQuestion | null;
+};
+
+export type StudyAttemptResult = {
+  correct: boolean;
+  attempts: number;
+  earnedXp: number;
+  coach: string;
+  explanation: string;
+  completed: boolean;
+  state: StudyState;
+};
+
+export type LuaIdManifest = {
+  version: string;
+  id: string;
+  handle: string;
+  displayName: string;
+  role: Role;
+  title: string;
+  bio: string;
+  level: number;
+  xp: number;
+  streakDays: number;
+  moonCoins: number;
+  avatar: { style: AvatarStyle; seed: string; config: AvatarConfig };
+  theme: ProfileTheme;
+  favoriteSubjects: string[];
+  visibility: "private" | "classroom";
+  player: PlayerProfile;
+  creator: CreatorProfile | null;
+  updatedAt: string;
+};
+
+export type ContactPayload = {
+  name: string;
+  email: string;
+  topic: "suporte" | "contato" | "escola" | "professor" | "privacidade";
+  message: string;
+};
+export type AdminContactMessage = {
+  id: string;
+  name: string;
+  email: string;
+  topic: ContactPayload["topic"];
+  message: string;
+  status: "new" | "open" | "resolved" | "spam";
+  createdAt: string;
+};
+

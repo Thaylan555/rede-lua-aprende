@@ -36,6 +36,10 @@ export const EXPERIENCE_MODES: Array<{ id: ExperienceMode; label: string; note: 
   { id: "lunar_rush", label: "Corrida Lunar", note: "Cronômetro e bônus de velocidade calculados no servidor.", recommended: { enforceTimer: true, speedBonus: true, speedBonusPercent: 30, timerSeconds: 20 } },
   { id: "star_hunt", label: "Caça às Estrelas", note: "Visual de coleta de estrelas com pontuação e progresso em destaque.", recommended: { enforceTimer: false, speedBonus: false, showProgress: true } },
   { id: "focus", label: "Modo Foco", note: "Menos distrações: ranking escondido durante as perguntas.", recommended: { enforceTimer: false, speedBonus: false, showLeaderboard: false } },
+  { id: "boss_battle", label: "Batalha de Chefão", note: "A turma derruba a energia de um chefão a cada etapa vencida.", recommended: { enforceTimer: false, speedBonus: false, showProgress: true, showLeaderboard: true } },
+  { id: "treasure_hunt", label: "Caça ao Tesouro", note: "Cada acerto revela uma nova pista do mapa.", recommended: { enforceTimer: false, speedBonus: false, showProgress: true, showLeaderboard: false } },
+  { id: "space_race", label: "Corrida Espacial", note: "Uma corrida visual de progresso entre os participantes.", recommended: { enforceTimer: true, speedBonus: true, speedBonusPercent: 20, timerSeconds: 25 } },
+  { id: "card_duel", label: "Duelo de Cartas", note: "Perguntas aparecem como cartas de desafio em rodadas curtas.", recommended: { enforceTimer: false, speedBonus: false, showProgress: true, showLeaderboard: true } },
 ];
 
 export function normalizeQuizTheme(value: any): QuizTheme {

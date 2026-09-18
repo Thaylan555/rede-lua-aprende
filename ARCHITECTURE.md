@@ -1,75 +1,65 @@
-# Arquitetura — Rede Lua Educação v6
+# Arquitetura — Rede Lua Educação v8
 
-## Fonte de verdade
-
-O Supabase permanece responsável por autenticação, PostgreSQL, RLS, RPCs e Storage. Não há D1/R2, Qdrant, Meilisearch ou Matomo na arquitetura atual.
-
-## Mega Perfil
-
-`rede_lua_profiles` guarda configuração declarativa, não a imagem renderizada:
-
-- `avatar_style`
-- `avatar_seed`
-- `avatar_config` JSONB
-- `profile_theme` JSONB
-- `profile_title`, `bio`, `favorite_subjects`, `profile_visibility`
-
-A imagem é renderizada pelo DiceBear HTTP API. O frontend consulta `/<style>/options.json`, monta os controles disponíveis e salva apenas as escolhas no Supabase.
-
-## Quiz Studio
-
-`rede_lua_activities` agora possui:
-
-- `experience_mode`
-- `theme_config`
-- `game_config`
-
-`rede_lua_questions` agora possui:
-
-- `question_type`
-- `media_url`
-- `hint`
-- `time_limit_seconds`
-
-A RPC `rede_lua_create_activity_v2` valida e cria a atividade. O jogo recebe tema/config via `rede_lua_game_state` e `rede_lua_host_game_state`.
-
-## Cronômetro
-
-O cliente mostra a contagem regressiva, mas a decisão final de timeout e bônus de velocidade acontece na RPC `rede_lua_answer`, usando `question_started_at` do servidor. Assim, o navegador não é a fonte de verdade da pontuação.
-
-## Imagens
-
-O bucket público `rede-lua-assets` aceita PNG/JPEG/WebP até 3 MB. Políticas limitam upload/alteração/exclusão a caminhos do próprio professor, com `rede_lua_is_teacher()`.
-
-
-## v6.9 — perfis jogáveis e ecossistema de criação
-
-- `rede_lua_creator_profile()` calcula XP/nível do educador, métricas, emblemas e vitrine sem duplicar esses dados em colunas.
-- `rede_lua_player_profile()` monta conquistas e histórico do aluno a partir das partidas reais.
-- `moon_coins` é a moeda cosmética ganha em respostas; `rede_lua_cosmetic_unlocks` registra apenas itens já desbloqueados.
-- `rede_lua_shared_forge()` expõe perguntas compartilhadas somente para professores autenticados. A cópia preserva o crédito exibido no Hub e cria uma versão editável na Forja do professor.
-- Novos estilos DiceBear continuam declarativos: o banco guarda estilo/seed/opções, nunca precisa armazenar a imagem gerada.
-- O QR Code usa um link `/#/game?code=...`; o roteador lê o código e pré-preenche a entrada da partida.
-
-## Universo Vivo / Admin v7
+## Visão geral
 
 ```text
-Cloudflare Pages
-  └─ React
-      ├─ EasterEggLayer / LumiMoment
-      ├─ Rede Lua Control
-      └─ experiências aluno/professor
-            │
-            ▼
-Supabase
-  ├─ Auth
-  ├─ rede_lua_admins
-  ├─ rede_lua_admin_audit
-  ├─ rede_lua_announcements
-  ├─ rede_lua_feature_flags
-  ├─ rede_lua_secret_unlocks
-  ├─ rede_lua_cosmetic_catalog
-  └─ RPCs com autorização server-side
+Navegador / App web
+  │
+  ├─ React + Vite (novo shell v8)
+  │   ├─ Aprender
+  │   ├─ Studio
+  │   ├─ LuaID
+  │   ├─ Biblioteca / Jogo
+  │   └─ Rede Lua Control
+  │
+  ├─ Cloudflare Pages Functions
+  │   ├─ /api/contact
+  │   ├─ /api/luaid/*
+  │   └─ fontes educacionais externas
+  │
+  └─ Supabase
+      ├─ Auth
+      ├─ PostgreSQL + RLS
+      ├─ RPCs pedagógicas
+      ├─ Storage
+      └─ Admin / auditoria
 ```
 
-O e-mail de bootstrap é usado apenas para associar o primeiro `user_id` ao papel `super_admin`; as decisões de autorização posteriores consultam `rede_lua_admins` e o status ativo da conta.
+## Aprendizado sem resposta pronta
+
+`rede_lua_study_sessions` registra o ponto atual da trilha e `rede_lua_study_attempts` registra as tentativas. O navegador nunca recebe o `correct_index` nessa experiência.
+
+`rede_lua_study_attempt()` decide a resposta no PostgreSQL. Se estiver errada, devolve apenas uma pista. A explicação é liberada somente em resposta correta. `rede_lua_study_skip()` avança sem devolver o gabarito.
+
+## Studio v3
+
+O frontend monta a atividade e chama `rede_lua_create_activity_v3()`. A validação de modo, perguntas, limites, tema e regras continua no servidor. Modos v8:
+
+- classic
+- lunar_rush
+- star_hunt
+- focus
+- boss_battle
+- treasure_hunt
+- space_race
+- card_duel
+
+## LuaID
+
+`rede_lua_profiles.profile_handle` é a identidade curta e única. O LuaID não substitui Supabase Auth: ele é uma camada de identidade pública/visual da Rede Lua.
+
+- `rede_lua_profile_manifest()` → manifesto completo autenticado.
+- `rede_lua_public_profile(handle)` → dados públicos limitados.
+- `/api/luaid/avatar/...` → proxy/cache do avatar DiceBear.
+
+Nenhuma chave administrativa vai para o navegador.
+
+## Contato e e-mail
+
+`POST /api/contact` valida o formulário na Cloudflare Function. Quando `SUPABASE_SERVICE_ROLE_KEY` está configurada, a mensagem é gravada em `rede_lua_contact_messages`. Com `RESEND_API_KEY`, a mesma requisição também envia e-mail ao endereço de suporte.
+
+A service-role fica somente em secret de servidor. O painel administrativo lê a caixa por RPC autenticada, não por acesso direto do cliente à tabela.
+
+## Compatibilidade
+
+As tabelas, perfis, Sala Viva, Loja Lunar, Admin v7 e RPCs anteriores foram mantidos. Isso permite migrar o frontend sem apagar histórico de quizzes, partidas ou perfis.

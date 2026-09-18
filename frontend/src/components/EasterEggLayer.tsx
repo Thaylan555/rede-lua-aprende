@@ -10,10 +10,10 @@ import { LumiMoment } from "./LumiMoment";
 
 const fragmentByView: Partial<Record<View, string>> = {
   home: "fragment-1",
-  explore: "fragment-2",
-  student: "fragment-3",
+  library: "fragment-2",
+  learn: "fragment-3",
   profile: "fragment-4",
-  teacher: "fragment-5",
+  studio: "fragment-5",
 };
 
 const guestKey = "rede-lua-guest-secrets";

@@ -117,4 +117,132 @@ app.get("/discover/world", async (c) => {
   } catch { return c.json({ error: "WORLD_DATA_UNAVAILABLE", message: "Os indicadores globais estão indisponíveis agora." }, 502); }
 });
 
+
+const approvedAvatarStyles = new Set([
+  "adventurer", "avataaars", "personas", "lorelei", "notionists", "bottts", "pixel-art",
+  "big-smile", "fun-emoji", "croodles", "micah", "thumbs", "shapes", "rings", "glass",
+]);
+
+function requiredSupabase(c: any) {
+  const url = c.env.SUPABASE_URL;
+  const key = c.env.SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) throw new Error("SUPABASE_SERVER_ENV_MISSING");
+  return { url: url.replace(/\/$/, ""), key };
+}
+
+async function supabaseRpc(c: any, name: string, body: unknown, authorization?: string) {
+  const { url, key } = requiredSupabase(c);
+  const response = await fetch(`${url}/rest/v1/rpc/${name}`, {
+    method: "POST",
+    headers: {
+      apikey: key,
+      Authorization: authorization || `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body ?? {}),
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    console.error("supabase_rpc_error", name, response.status, text.slice(0, 500));
+    return { ok: false as const, status: response.status, data: null };
+  }
+  return { ok: true as const, status: response.status, data: await response.json() };
+}
+
+app.get("/luaid/me", async (c) => {
+  const authorization = c.req.header("Authorization");
+  if (!authorization?.startsWith("Bearer ")) return c.json({ error: "AUTH_REQUIRED", message: "Entre para abrir seu LuaID." }, 401);
+  const result = await supabaseRpc(c, "rede_lua_profile_manifest", {}, authorization);
+  if (!result.ok) return c.json({ error: "PROFILE_UNAVAILABLE", message: "Não foi possível carregar o LuaID." }, result.status === 401 ? 401 : 502);
+  c.header("Cache-Control", "private, no-store");
+  return c.json(result.data);
+});
+
+app.get("/luaid/profile/:handle", async (c) => {
+  const handle = z.string().trim().regex(/^[a-zA-Z0-9_]{3,24}$/).parse(c.req.param("handle"));
+  const result = await supabaseRpc(c, "rede_lua_public_profile", { p_handle: handle });
+  if (!result.ok || !result.data) return c.json({ error: "PROFILE_NOT_FOUND", message: "Esse perfil não está público." }, 404);
+  c.header("Cache-Control", "public, max-age=120, s-maxage=300");
+  return c.json(result.data);
+});
+
+app.get("/luaid/avatar/:style/:seed.svg", async (c) => {
+  const style = z.string().trim().regex(/^[a-z0-9-]{2,32}$/).parse(c.req.param("style"));
+  const seed = z.string().trim().min(2).max(90).parse(c.req.param("seed"));
+  if (!approvedAvatarStyles.has(style)) return c.json({ error: "STYLE_NOT_ALLOWED" }, 400);
+  const url = new URL(`https://api.dicebear.com/10.x/${style}/svg`);
+  url.searchParams.set("seed", seed);
+  url.searchParams.set("radius", "22");
+  url.searchParams.set("backgroundType", "gradientLinear");
+  const response = await fetch(url.toString(), { signal: AbortSignal.timeout(7000) });
+  if (!response.ok) return c.json({ error: "AVATAR_SOURCE_UNAVAILABLE" }, 502);
+  c.header("Content-Type", "image/svg+xml; charset=utf-8");
+  c.header("Cache-Control", "public, max-age=86400, s-maxage=604800");
+  return c.body(await response.text());
+});
+
+const contactSchema = z.object({
+  name: z.string().trim().min(2).max(80),
+  email: z.string().trim().email().max(180),
+  topic: z.enum(["suporte", "contato", "escola", "professor", "privacidade"]),
+  message: z.string().trim().min(10).max(3000),
+});
+
+app.post("/contact", async (c) => {
+  const payload = contactSchema.parse(await c.req.json());
+  const serviceKey = c.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = c.env.SUPABASE_URL?.replace(/\/$/, "");
+  const authHeader = c.req.header("Authorization");
+  let userId: string | null = null;
+
+  if (authHeader?.startsWith("Bearer ") && supabaseUrl && c.env.SUPABASE_PUBLISHABLE_KEY) {
+    try {
+      const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+        headers: { apikey: c.env.SUPABASE_PUBLISHABLE_KEY, Authorization: authHeader },
+        signal: AbortSignal.timeout(5000),
+      });
+      if (userResponse.ok) userId = (await userResponse.json())?.id || null;
+    } catch { /* contato continua funcionando sem sessão */ }
+  }
+
+  let stored = false;
+  if (serviceKey && supabaseUrl) {
+    const response = await fetch(`${supabaseUrl}/rest/v1/rede_lua_contact_messages`, {
+      method: "POST",
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({ user_id: userId, name: payload.name, email: payload.email, topic: payload.topic, message: payload.message }),
+      signal: AbortSignal.timeout(7000),
+    });
+    stored = response.ok;
+  }
+
+  let emailed = false;
+  if (c.env.RESEND_API_KEY) {
+    const to = c.env.CONTACT_TO_EMAIL || "support@redelua.xyz";
+    const from = c.env.CONTACT_FROM_EMAIL || "Rede Lua <contato@redelua.xyz>";
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${c.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        reply_to: payload.email,
+        subject: `[Rede Lua] ${payload.topic} — ${payload.name}`,
+        text: `Nome: ${payload.name}\nE-mail: ${payload.email}\nAssunto: ${payload.topic}\n\n${payload.message}`,
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
+    emailed = response.ok;
+  }
+
+  if (!stored && !emailed) return c.json({ error: "CONTACT_NOT_CONFIGURED", message: "O canal de contato ainda não foi configurado. Use support@redelua.xyz por enquanto." }, 503);
+  return c.json({ ok: true, stored, emailed });
+});
+
 export const onRequest = handle(app);
