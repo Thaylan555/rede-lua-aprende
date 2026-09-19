@@ -1,3 +1,7 @@
+# Rede Lua Educação — v9.2
+
+> Lua Avatar API 2: renderer SVG próprio, 24 espécies e identidade visual unificada.
+
 
 ## v9.0 — Universo 95
 

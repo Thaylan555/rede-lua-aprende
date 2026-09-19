@@ -1,5 +1,4 @@
 import { buildAvatarUrl } from "../avatar";
-import { LuaMateAvatar } from "./LuaMateAvatar";
 import type { AvatarConfig, AvatarStyle } from "../types";
 
 type Props = {
@@ -21,12 +20,13 @@ export function AvatarVisual({ style, seed, config, size = 320, alt = "", compac
   const frame = textValue(config, "_luaFrame");
   const companion = textValue(config, "_luaCompanion");
 
+  const apiRendered = style === "lua-mates";
   return <div className={`lua-avatar ${compact ? "lua-avatar-compact" : ""} aura-${aura} frame-${frame} ${className}`.trim()}>
-    <div className="lua-avatar-base">{style === "lua-mates" ? <LuaMateAvatar seed={seed} config={config} alt={alt} /> : <img src={buildAvatarUrl(style, seed, config, size)} alt={alt} />}</div>
-    {!compact && aura !== "none" && <Aura kind={aura} />}
-    {!compact && head !== "none" && <HeadGear kind={head} />}
-    {!compact && face !== "none" && <FaceGear kind={face} />}
-    {!compact && companion !== "none" && <Companion kind={companion} />}
+    <div className="lua-avatar-base"><img src={buildAvatarUrl(style, seed, config, size)} alt={alt} loading="lazy" decoding="async" /></div>
+    {!apiRendered && !compact && aura !== "none" && <Aura kind={aura} />}
+    {!apiRendered && !compact && head !== "none" && <HeadGear kind={head} />}
+    {!apiRendered && !compact && face !== "none" && <FaceGear kind={face} />}
+    {!apiRendered && !compact && companion !== "none" && <Companion kind={companion} />}
   </div>;
 }
 

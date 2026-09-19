@@ -44,49 +44,57 @@ export const AVATAR_KITS: AvatarKit[] = [
 
 export const LUA_MATE_SPECIES = [
   ["moon-bear", "Urso Lunar", "🐻"], ["nebula-fox", "Raposa Nebular", "🦊"], ["cosmic-penguin", "Pinguim Cósmico", "🐧"],
-  ["lunar-capybara", "Capivara Lunar", "🟤"], ["wise-owl", "Coruja Sábia", "🦉"], ["pocket-dragon", "Dragão de Bolso", "🐲"],
+  ["lunar-capybara", "Capivara Lunar", "🦫"], ["wise-owl", "Coruja Sábia", "🦉"], ["pocket-dragon", "Dragão de Bolso", "🐲"],
   ["orbit-robot", "Robô Órbita", "🤖"], ["astro-cat", "Gato Astro", "🐱"], ["prism-axolotl", "Axolote Prisma", "🩷"],
   ["star-bunny", "Coelho Estelar", "🐰"], ["comet-monkey", "Macaco Cometa", "🐵"], ["cloud-yeti", "Yeti Nuvem", "☁️"],
   ["panda-pop", "Panda Pop", "🐼"], ["frog-orbit", "Sapo Órbita", "🐸"], ["otter-wave", "Lontra Onda", "🦦"], ["raccoon-moon", "Guaxinim Lunar", "🦝"],
+  ["sun-lion", "Leão Solar", "🦁"], ["forest-deer", "Cervo Aurora", "🦌"], ["midnight-wolf", "Lobo Eclipse", "🐺"], ["rocket-chicken", "Galinha Foguete", "🐔"],
+  ["crystal-unicorn", "Unicórnio Cristal", "🦄"], ["moon-skull", "Caveira Lunar", "💀"], ["planet-pal", "Planeta Vivo", "🌎"], ["tiny-alien", "Alienzinho Lunar", "👽"],
 ] as const;
 
 export const LUA_EXPRESSIONS = [
   ["happy", "Feliz", "😄"], ["curious", "Curioso", "🤔"], ["confident", "Confiante", "😏"], ["surprised", "Surpreso", "😮"],
+  ["sleepy", "Soninho", "😴"], ["focused", "Focado", "🧐"], ["mischief", "Travesso", "😼"], ["victory", "Vitória", "🏆"],
 ] as const;
 
 export const LUA_EYES = [
   ["spark", "Brilho", "✨"], ["round", "Redondo", "●"], ["soft", "Suave", "◉"], ["bold", "Marcante", "👀"],
+  ["star", "Estrela", "⭐"], ["pixel", "Pixel", "▦"],
 ] as const;
 
 export const LUA_MARKS = [
-  ["blush", "Bochecha", "🌸"], ["freckles", "Sardinhas", "••"], ["star", "Estrela", "⭐"], ["none", "Limpo", "—"],
+  ["none", "Limpo", "—"], ["blush", "Bochecha", "🌸"], ["freckles", "Sardinhas", "••"], ["star", "Estrela", "⭐"],
+  ["stripe", "Faixa", "〰"], ["moon", "Lua", "🌙"],
 ] as const;
 
 export const LUA_OUTFITS = [
-  ["academy", "Academia Lunar", "🎒"], ["space", "Explorador Espacial", "🚀"], ["science", "Laboratório", "🧪"], ["arcade", "Arcade", "🎮"], ["pirate", "Aventura Pirata", "🏴‍☠️"],
+  ["academy", "Academia Lunar", "🎒"], ["space", "Explorador Espacial", "🚀"], ["science", "Laboratório", "🧪"], ["arcade", "Arcade", "🎮"],
+  ["pirate", "Aventura Pirata", "🏴‍☠️"], ["street", "Street", "🧢"], ["royal", "Real", "👑"], ["hero", "Herói Lunar", "🦸"],
 ] as const;
 
 export const LUA_COMPANIONS = [
-  ["none", "Sem companheiro", "—"], ["mini-moon", "Mini Lua", "🌙"], ["book-sprite", "Livro Vivo", "📘"], ["mini-rocket", "Mini Foguete", "🚀"],
-  ["star-buddy", "Estrelinha", "⭐"], ["robot-pet", "Robô Pet", "🤖"], ["frog-orbit", "Sapo Órbita", "🐸"], ["planet-buddy", "Planetinha", "🪐"], ["pencil-sprite", "Lápis Vivo", "✏️"],
+  ["none", "Sem companheiro", "—"], ["mini-moon", "Mini Lua", "🌙"], ["book-sprite", "Livro Vivo", "📘"],
+  ["star-buddy", "Estrelinha", "⭐"], ["robot-pet", "Robô Pet", "🤖"], ["planet-buddy", "Planetinha", "🪐"],
 ] as const;
 
 export const LUA_BACKDROPS = [
-  ["stars", "Céu Estelar"], ["orbit", "Órbita"], ["grid", "Arcade"], ["plain", "Limpo"],
+  ["aurora", "Aurora"], ["stars", "Céu Estelar"], ["arcade", "Arcade"], ["sunset", "Pôr do sol"], ["forest", "Floresta"], ["clean", "Limpo"],
 ] as const;
 
 export const LUA_GEAR = {
   head: [
-    ["none", "Sem item"], ["pirate-hat", "Chapéu pirata"], ["headset", "Headset gamer"], ["wizard-hat", "Chapéu de mago"], ["street-cap", "Boné street"], ["robot-antenna", "Antena robô"], ["comet-crown", "Coroa Cometa"], ["cowboy-hat", "Chapéu cowboy"], ["top-hat", "Cartola"], ["classic-crown", "Coroa clássica"], ["pancake-stack", "Torre de panquecas"], ["flower-crown", "Coroa de flores"], ["scholar-cap", "Capelo"], ["party-hat", "Chapéu de festa"], ["winter-beanie", "Gorro"],
+    ["none", "Sem item"], ["crown", "Coroa"], ["headset", "Headset gamer"], ["flower-crown", "Coroa de flores"],
+    ["scholar-cap", "Capelo"], ["pirate-hat", "Chapéu pirata"], ["space-helmet", "Capacete espacial"], ["wizard-hat", "Chapéu de mago"],
   ],
   face: [
-    ["none", "Sem item"], ["eyepatch", "Tapa-olho"], ["neon-visor", "Visor neon"], ["star-glasses", "Óculos estrela"], ["mask", "Máscara tech"], ["prism-glasses", "Óculos Prisma"], ["nerd-glasses", "Óculos nerd"], ["round-glasses", "Óculos redondo"], ["pixel-shades", "Óculos pixel"], ["moustache", "Bigode divertido"], ["monocle", "Monóculo"],
+    ["none", "Sem item"], ["eyepatch", "Tapa-olho"], ["round-glasses", "Óculos redondos"], ["star-glasses", "Óculos estrela"],
+    ["neon-visor", "Visor neon"], ["moustache", "Bigode divertido"],
   ],
   aura: [
-    ["none", "Sem efeito"], ["stars", "Estrelas"], ["neon", "Neon"], ["pixels", "Pixels"], ["cosmic", "Órbita cósmica"], ["comet", "Rastro de Cometa"], ["confetti", "Confete"], ["hearts", "Corações"], ["snow", "Neve"], ["books", "Livros voando"],
+    ["none", "Sem efeito"], ["stars", "Estrelas"], ["confetti", "Confete"], ["hearts", "Corações"], ["cosmic", "Cósmica"], ["neon", "Neon"],
   ],
   frame: [
-    ["none", "Clássica"], ["pirate", "Pirata"], ["tech", "Tech"], ["arcade", "Arcade"], ["cosmic", "Cósmica"], ["street", "Street"], ["quasar", "Quasar"], ["royal", "Real"], ["forest", "Floresta"], ["frost", "Gelo"], ["candy", "Doce"],
+    ["none", "Sem moldura"], ["classic", "Clássica"], ["royal", "Real"], ["arcade", "Arcade"], ["frost", "Gelo"], ["cosmic", "Cósmica"],
   ],
 } as const;
 
@@ -115,7 +123,19 @@ export type DiceBearOptions = Record<string, DiceBearOptionMeta>;
 const blockedKeys = new Set(["seed", "size", "radius", "backgroundType", "backgroundRotation", "randomizeIds"]);
 
 export function buildAvatarUrl(style: AvatarStyle, seed: string, config: AvatarConfig = {}, size = 320) {
-  if (style === "lua-mates") return "";
+  if (style === "lua-mates") {
+    const params = new URLSearchParams();
+    const map: Record<string, string> = {
+      _luaSpecies: "species", _luaExpression: "expression", _luaEyes: "eyes", _luaMark: "marking", _luaOutfit: "outfit",
+      _luaHead: "head", _luaFace: "face", _luaAura: "aura", _luaFrame: "frame", _luaCompanion: "companion",
+      _luaBackdrop: "background", _luaPalette: "palette",
+    };
+    Object.entries(map).forEach(([key, query]) => {
+      const value = config[key];
+      if (typeof value === "string" && value) params.set(query, value);
+    });
+    return `/api/avatar/v2/render/${encodeURIComponent(seed || "rede-lua")}.svg?${params.toString()}`;
+  }
   const params = new URLSearchParams();
   params.set("seed", seed || "rede-lua");
   params.set("size", String(Math.max(64, Math.min(512, size))));

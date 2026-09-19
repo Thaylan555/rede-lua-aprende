@@ -15,6 +15,7 @@ import {
   humanizeAvatarOption,
   humanizeAvatarValue,
   loadAvatarOptions,
+  LUA_BACKDROPS,
   LUA_COMPANIONS,
   LUA_EYES,
   LUA_EXPRESSIONS,
@@ -114,6 +115,7 @@ export function LuaIDView({ user, onLogin }: { user: SessionUser | null; onLogin
       _luaAura: randomOf(LUA_GEAR.aura)[0],
       _luaFrame: randomOf(LUA_GEAR.frame)[0],
       _luaCompanion: randomOf(LUA_COMPANIONS)[0],
+      _luaBackdrop: randomOf(LUA_BACKDROPS)[0],
     };
     if (useLuaMate) {
       next._luaSpecies = randomOf(LUA_MATE_SPECIES)[0];
@@ -197,7 +199,7 @@ export function LuaIDView({ user, onLogin }: { user: SessionUser | null; onLogin
           <span className="v91-eyebrow"><MoonStar /> LUAID • AVATAR LAB</span>
           <h1>Agora seu boneco tem <em>cara de personagem.</em></h1>
           <p>Mais expressão, mais mascotes, mais peças e um editor que parece jogo — não formulário de cadastro.</p>
-          <div className="v91-hero-pills"><span>16 LuaMates</span><span>looks prontos</span><span>inventário</span><span>Nova Vida</span></div>
+          <div className="v91-hero-pills"><span>24 LuaMates</span><span>looks prontos</span><span>inventário</span><span>Nova Vida</span></div>
         </div>
         <button className="v91-surprise" onClick={surpriseMe}><Dices /><span><strong>Surpreenda-me</strong><small>gera outro universo</small></span></button>
       </header>
@@ -280,6 +282,7 @@ export function LuaIDView({ user, onLogin }: { user: SessionUser | null; onLogin
               <GearRail label="Efeito" items={LUA_GEAR.aura} value={luaValue("_luaAura")} onChange={(v) => setConfig("_luaAura", v)} />
               <GearRail label="Moldura" items={LUA_GEAR.frame} value={luaValue("_luaFrame")} onChange={(v) => setConfig("_luaFrame", v)} />
               <GearRail label="Companheiro" items={LUA_COMPANIONS.map(([a,b,c]) => [a, `${c} ${b}`] as const)} value={luaValue("_luaCompanion")} onChange={(v) => setConfig("_luaCompanion", v)} />
+              <GearRail label="Fundo" items={LUA_BACKDROPS} value={luaValue("_luaBackdrop", "aurora")} onChange={(v) => setConfig("_luaBackdrop", v)} />
             </Panel>
           </div>}
 
