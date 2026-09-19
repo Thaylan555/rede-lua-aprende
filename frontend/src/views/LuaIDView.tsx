@@ -170,8 +170,8 @@ export function LuaIDView({ user, onLogin }: { user: SessionUser | null; onLogin
       displayName,
       profileTitle: title,
       bio,
-      lifeNumber: user.lifeNumber,
-      legacyStars: user.legacyStars,
+      lifeNumber: user?.lifeNumber ?? 1,
+      legacyStars: user?.legacyStars ?? 0,
       savePreview: true,
     }),
     onSuccess: async (result) => {
