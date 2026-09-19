@@ -220,3 +220,8 @@ body{background:#f6f9ff;color:var(--p-ink)}
   .v93-notification-meta{flex-direction:column}
   .v93-notification-actions{display:grid;grid-template-columns:1fr}
 }
+
+.v94-ai-mode{display:grid;gap:4px;padding:12px 14px;border-radius:16px;border:1px solid rgba(22,62,122,.12);font-size:12px;line-height:1.45}
+.v94-ai-mode strong{font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.v94-ai-mode.reference{background:#ecfff8;color:#1d684d;border-color:rgba(31,153,107,.22)}
+.v94-ai-mode.prompt{background:#fff8df;color:#805d00;border-color:rgba(197,146,0,.2)}

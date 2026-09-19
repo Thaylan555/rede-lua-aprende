@@ -63,7 +63,7 @@ export function LuaIDView({ user, onLogin }: { user: SessionUser | null; onLogin
   const [theme, setTheme] = useState<ProfileTheme>(user?.profileTheme || themes[0].theme);
   const [visibility, setVisibility] = useState<"private" | "classroom">(user?.profileVisibility || "private");
   const [favorites, setFavorites] = useState<string[]>(user?.favoriteSubjects || []);
-  const [aiPreview, setAiPreview] = useState<{ imageDataUrl: string; prompt: string; summary: string; remoteUrl: string; generatedAt?: string | null } | null>(user?.avatarAiImageUrl ? { imageDataUrl: user.avatarAiImageUrl, prompt: user.avatarAiPrompt || "", summary: "", remoteUrl: user.avatarAiImageUrl, generatedAt: user.avatarAiGeneratedAt || null } : null);
+  const [aiPreview, setAiPreview] = useState<{ imageDataUrl: string; prompt: string; summary: string; remoteUrl: string; generatedAt?: string | null; mode?: "reference" | "prompt"; referenceImageUrl?: string } | null>(user?.avatarAiImageUrl ? { imageDataUrl: user.avatarAiImageUrl, prompt: user.avatarAiPrompt || "", summary: "", remoteUrl: user.avatarAiImageUrl, generatedAt: user.avatarAiGeneratedAt || null } : null);
 
   useEffect(() => {
     if (!user) return;
@@ -175,7 +175,7 @@ export function LuaIDView({ user, onLogin }: { user: SessionUser | null; onLogin
       savePreview: true,
     }),
     onSuccess: async (result) => {
-      setAiPreview({ imageDataUrl: result.imageDataUrl, prompt: result.prompt, summary: result.summary, remoteUrl: result.remoteUrl, generatedAt: result.stored?.generatedAt || new Date().toISOString() });
+      setAiPreview({ imageDataUrl: result.imageDataUrl, prompt: result.prompt, summary: result.summary, remoteUrl: result.remoteUrl, generatedAt: result.stored?.generatedAt || new Date().toISOString(), mode: result.mode, referenceImageUrl: result.referenceImageUrl });
       await qc.invalidateQueries({ queryKey: ["session"] });
       toast.success("A versão IA do seu avatar ficou pronta ✨");
       celebrate(100);
@@ -280,6 +280,7 @@ export function LuaIDView({ user, onLogin }: { user: SessionUser | null; onLogin
                   <button onClick={() => generateAiAvatar.mutate()} disabled={generateAiAvatar.isPending}>{generateAiAvatar.isPending ? <LoaderCircle className="spin" /> : <Sparkles />} {aiPreview ? "Gerar novamente" : "Gerar imagem real"}</button>
                   {aiPreview?.remoteUrl && <a href={aiPreview.remoteUrl} target="_blank" rel="noreferrer">Abrir original</a>}
                 </div>
+                {aiPreview && <div className={`v94-ai-mode ${aiPreview.mode === "reference" ? "reference" : "prompt"}`}><strong>{aiPreview.mode === "reference" ? "Modo referência ativo" : "Modo gratuito por prompt"}</strong><span>{aiPreview.mode === "reference" ? "A IA recebeu o seu LuaMate como imagem de referência para preservar espécie, roupa e silhueta." : "Sem chave da Pollinations, a IA não recebe a imagem-base. O prompt ficou mais rígido para evitar humanos, mas o modo referência é bem mais fiel."}</span></div>}
                 <div className="v93-ai-prompt-box">
                   <strong>Prompt automático da API</strong>
                   <p>Ele é montado com o seu estilo, peças, vida atual, nome e título. Você não precisa escrever nada manualmente.</p>

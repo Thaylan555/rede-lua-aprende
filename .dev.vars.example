@@ -16,6 +16,8 @@ VITE_DICEBEAR_API_URL=https://api.dicebear.com/10.x
 
 # Avatar AI (opcional)
 POLLINATIONS_BASE_URL=https://image.pollinations.ai/prompt
-POLLINATIONS_MODEL=flux
+POLLINATIONS_MODEL=zimage
+# Com token, usa image-to-image para manter o LuaMate
+POLLINATIONS_EDIT_MODEL=kontext
 # Se você tiver token, configure como secret no Cloudflare
 POLLINATIONS_TOKEN=

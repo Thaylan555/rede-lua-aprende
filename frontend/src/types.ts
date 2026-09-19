@@ -409,6 +409,8 @@ export type AvatarAiPreviewResult = {
   model: string;
   remoteUrl: string;
   imageDataUrl: string;
+  mode?: "reference" | "prompt";
+  referenceImageUrl?: string;
   stored?: {
     ok: true;
     imageUrl: string;

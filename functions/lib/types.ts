@@ -8,5 +8,6 @@ export type Env = {
   CONTACT_FROM_EMAIL?: string;
   POLLINATIONS_BASE_URL?: string;
   POLLINATIONS_MODEL?: string;
+  POLLINATIONS_EDIT_MODEL?: string;
   POLLINATIONS_TOKEN?: string;
 };

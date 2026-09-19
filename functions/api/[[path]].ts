@@ -221,14 +221,13 @@ function buildAvatarAiPrompt(payload: {
   legacyStars?: number;
 }) {
   const config = payload.avatarConfig || {};
-  const name = payload.displayName?.trim() || "estudante da Rede Lua";
   const title = payload.profileTitle?.trim() || "Explorador Lunar";
-  const bio = payload.bio?.trim() || "";
   const style = payload.avatarStyle || "lua-mates";
+  const species = describeLuaValue("species", config._luaSpecies) || "mascote lunar";
 
   const lookBits = style === "lua-mates"
     ? [
-        describeLuaValue("species", config._luaSpecies),
+        species,
         describeLuaValue("expression", config._luaExpression),
         describeLuaValue("eyes", config._luaEyes),
         describeLuaValue("marking", config._luaMark),
@@ -236,29 +235,48 @@ function buildAvatarAiPrompt(payload: {
         describeLuaValue("head", config._luaHead),
         describeLuaValue("face", config._luaFace),
         describeLuaValue("aura", config._luaAura),
-        describeLuaValue("frame", config._luaFrame),
         describeLuaValue("companion", config._luaCompanion),
         describeLuaValue("background", config._luaBackdrop),
       ].filter(Boolean).join(", ")
     : `avatar em estilo ${style.replace(/[-_]/g, " ")}`;
 
-  const lifeText = payload.lifeNumber ? `Vida ${payload.lifeNumber}` : "";
-  const legacyText = payload.legacyStars ? `${payload.legacyStars} estrelas de legado` : "";
-  const persona = [name, title, lifeText, legacyText].filter(Boolean).join(" • ");
-  const mood = bio ? `A bio do perfil sugere: ${bio}.` : "";
+  const prompt = style === "lua-mates"
+    ? [
+        `MASCOTE CARTOON NÃO-HUMANO. O personagem principal é especificamente um ${species}.`,
+        "Preserve a espécie animal/criatura. NÃO transforme em pessoa humana, mulher, homem, criança, adolescente, humano anime, rosto humano ou pele humana.",
+        `Visual obrigatório: ${lookBits}.`,
+        "Crie uma versão premium do mesmo mascote para a Rede Lua na Educação, mantendo cabeça, focinho/bico/orelhas/chifres e silhueta coerentes com a espécie.",
+        "Estilo 2D/2.5D cartoon de jogo educacional, formas arredondadas, olhos muito expressivos, acabamento limpo, luz suave, cores vivas, leitura forte em tamanho pequeno.",
+        "Composição quadrada de avatar, personagem centralizado do peito para cima, fundo espacial divertido e simples. Sem texto, sem letras, sem logo inserido pelo desenho.",
+        `Personalidade visual: ${title}.`,
+      ].join(" ")
+    : [
+        "Crie um avatar cartoon original e estilizado para a Rede Lua na Educação.",
+        `Base visual: ${lookBits}.`,
+        "Não use aparência fotorealista. Prefira personagem de jogo educacional, formas limpas, olhos expressivos e cores vivas.",
+        "Composição quadrada, personagem centralizado, sem texto e sem logo desenhado.",
+      ].join(" ");
 
-  const prompt = [
-    "Crie um retrato vertical 2D/2.5D de avatar original para a plataforma educacional brasileira Rede Lua na Educação.",
-    `O personagem representa ${persona || "um estudante criativo da Rede Lua"}.`,
-    style === "lua-mates"
-      ? `Use como base visual: ${lookBits}.`
-      : `Use um visual original e amigável inspirado no estilo ${style.replace(/[-_]/g, " ")}, sem copiar personagens famosos.` ,
-    "Mantenha aparência de mascote/cartoon premium, traço limpo, iluminação suave, composição central, fundo elegante e coerente com educação, criatividade e universo espacial.",
-    "Mostre o personagem inteiro ou quase inteiro, com leitura clara do rosto e dos acessórios, sem texto, sem marca d'água, sem logo.",
-    mood,
-  ].filter(Boolean).join(" ");
+  return { prompt, summary: lookBits || style, species };
+}
 
-  return { prompt, summary: lookBits || style };
+function buildLuaReferenceUrl(c: any, payload: { avatarStyle: string; avatarSeed?: string; avatarConfig?: Record<string, unknown> }) {
+  const origin = new URL(c.req.url).origin;
+  const seed = payload.avatarSeed || "rede-lua";
+  if (payload.avatarStyle !== "lua-mates") {
+    return `${origin}/api/luaid/avatar/${encodeURIComponent(payload.avatarStyle)}/${encodeURIComponent(seed)}.svg`;
+  }
+  const config = payload.avatarConfig || {};
+  const params = new URLSearchParams();
+  const map: Record<string, string> = {
+    _luaSpecies: "species", _luaExpression: "expression", _luaEyes: "eyes", _luaMark: "marking", _luaOutfit: "outfit",
+    _luaHead: "head", _luaFace: "face", _luaAura: "aura", _luaFrame: "frame", _luaCompanion: "companion", _luaBackdrop: "background",
+  };
+  for (const [key, query] of Object.entries(map)) {
+    const value = config[key];
+    if (typeof value === "string" && value) params.set(query, value);
+  }
+  return `${origin}/api/avatar/v2/render/${encodeURIComponent(seed)}.svg?${params.toString()}`;
 }
 
 app.get("/luaid/me", async (c) => {
@@ -372,25 +390,33 @@ app.post("/avatar/v2/enhance", async (c) => {
   const payload = avatarEnhanceSchema.parse(await c.req.json());
   const built = buildAvatarAiPrompt(payload);
   const seed = payload.avatarSeed || crypto.randomUUID();
-  const base = (c.env.POLLINATIONS_BASE_URL || "https://image.pollinations.ai/prompt").replace(/\/$/, "");
-  const model = c.env.POLLINATIONS_MODEL || "flux";
+  const referenceImageUrl = buildLuaReferenceUrl(c, payload);
+  const hasProviderKey = Boolean(c.env.POLLINATIONS_TOKEN);
+
+  // Com chave: usa o gateway atual e um modelo image-to-image para preservar o LuaMate.
+  // Sem chave: mantém um fallback gratuito por texto, mas com prompt rígido e sem enhance automático.
+  const model = hasProviderKey ? (c.env.POLLINATIONS_EDIT_MODEL || "kontext") : (c.env.POLLINATIONS_MODEL || "zimage");
+  const base = hasProviderKey
+    ? "https://gen.pollinations.ai/image"
+    : (c.env.POLLINATIONS_BASE_URL || "https://image.pollinations.ai/prompt").replace(/\/$/, "");
   const params = new URLSearchParams({
     width: "768",
     height: "768",
     model,
     seed,
     safe: "true",
-    enhance: "true",
   });
-  if (c.env.POLLINATIONS_TOKEN) {
+  if (hasProviderKey) {
+    params.set("image", referenceImageUrl);
     params.set("nologo", "true");
     params.set("private", "true");
   }
+
   const remoteUrl = `${base}/${encodeURIComponent(built.prompt)}?${params.toString()}`;
   const headers: Record<string, string> = { Accept: "image/png,image/jpeg,image/webp;q=0.9,*/*;q=0.8" };
   if (c.env.POLLINATIONS_TOKEN) headers.Authorization = `Bearer ${c.env.POLLINATIONS_TOKEN}`;
 
-  const imageResponse = await fetch(remoteUrl, { headers, signal: AbortSignal.timeout(45000) });
+  const imageResponse = await fetch(remoteUrl, { headers, signal: AbortSignal.timeout(55000) });
   if (!imageResponse.ok) {
     const detail = await imageResponse.text().catch(() => "");
     console.error("avatar_ai_error", imageResponse.status, detail.slice(0, 300));
@@ -405,11 +431,9 @@ app.post("/avatar/v2/enhance", async (c) => {
   if (payload.savePreview !== false) {
     const saved = await supabaseRpc(c, "rede_lua_set_avatar_ai_preview", {
       p_prompt: built.prompt,
-      // A imagem é entregue diretamente ao frontend. Não salvamos a URL de geração
-      // para evitar regenerar a imagem a cada abertura do perfil no tier gratuito.
       p_image_url: "",
       p_seed: seed,
-      p_provider: "pollinations",
+      p_provider: hasProviderKey ? "pollinations-reference" : "pollinations-free",
     }, authorization);
     if (saved.ok) stored = saved.data;
   }
@@ -422,6 +446,8 @@ app.post("/avatar/v2/enhance", async (c) => {
     summary: built.summary,
     provider: "pollinations",
     model,
+    mode: hasProviderKey ? "reference" : "prompt",
+    referenceImageUrl,
     remoteUrl,
     imageDataUrl,
     stored,
