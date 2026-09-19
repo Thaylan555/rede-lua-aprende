@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 import { trackEvent } from "./analytics";
 import { normalizeGameConfig, normalizeQuizTheme } from "./quizTheme";
-import type { Activity, AvatarConfig, AvatarStyle, Difficulty, DraftQuestion, ExperienceMode, ForgeQuestion, GameConfig, GameReaction, GameState, HostGame, ParticipantSession, ProfileTheme, PublicActivity, QuizTheme, Role, SessionResponse, SessionUser, StudentConstellation, TeacherRadar, CreatorProfile, SharedForgeQuestion, PlayerProfile, CosmeticsState, AdminDashboard, AdminUserRow, AdminAnnouncement, FeatureFlag, TeacherInviteAdmin, AdminAuditEntry, CosmeticCatalogItem, AdminActivityRow, StudyState, StudyAttemptResult, LuaIdManifest, ContactPayload, AdminContactMessage } from "./types";
+import type { Activity, AvatarConfig, AvatarStyle, Difficulty, DraftQuestion, ExperienceMode, ForgeQuestion, GameConfig, GameReaction, GameState, HostGame, ParticipantSession, ProfileTheme, PublicActivity, QuizTheme, Role, SessionResponse, SessionUser, StudentConstellation, TeacherRadar, CreatorProfile, SharedForgeQuestion, PlayerProfile, CosmeticsState, AdminDashboard, AdminUserRow, AdminAnnouncement, FeatureFlag, TeacherInviteAdmin, AdminAuditEntry, CosmeticCatalogItem, AdminActivityRow, StudyState, StudyAttemptResult, LuaIdManifest, ContactPayload, AdminContactMessage, RecordsProfile, NewLifeResult } from "./types";
 
 class ApiError extends Error {
   status: number;
@@ -39,6 +39,7 @@ const messageFor = (message?: string) => {
     COSMETIC_NOT_FOUND: "Esse item da Loja Lunar não foi encontrado.",
     COSMETIC_LEVEL_REQUIRED: "Você ainda não chegou ao nível necessário para esse item.",
     NOT_ENOUGH_MOON_COINS: "Você ainda não tem Luas suficientes para esse item.",
+    LIFE_NOT_READY: "Uai, sua vida atual ainda tem história pra viver antes do renascimento.",
   };
   return known[message] || message.replace(/^.*?:\s*/, "") || "Não foi possível concluir a ação.";
 };
@@ -50,7 +51,7 @@ function dbError(error: any): never {
     GAME_NOT_STARTABLE: 1, GAME_NOT_RUNNING: 1, INVALID_PARTICIPANT: 1, ACTIVITY_NOT_FOUND: 1,
     AUTH_REQUIRED: 1, INVALID_AVATAR_STYLE: 1, INVALID_PROFILE_TITLE: 1, BIO_TOO_LONG: 1, INVALID_EXPERIENCE_MODE: 1,
     ADMIN_REQUIRED: 1, CANNOT_SUSPEND_SELF: 1, ADMIN_ROLE_PROTECTED: 1, SUPER_ADMIN_PROTECTED: 1, INVITE_CODE_TOO_SHORT: 1,
-    FLAG_NOT_FOUND: 1, COSMETIC_NOT_FOUND: 1, COSMETIC_LEVEL_REQUIRED: 1, NOT_ENOUGH_MOON_COINS: 1, PROFILE_TEXT_NOT_ALLOWED: 1,
+    FLAG_NOT_FOUND: 1, COSMETIC_NOT_FOUND: 1, COSMETIC_LEVEL_REQUIRED: 1, NOT_ENOUGH_MOON_COINS: 1, PROFILE_TEXT_NOT_ALLOWED: 1, LIFE_NOT_READY: 1,
   }).find((key) => raw.includes(key));
   throw new ApiError(messageFor(code || raw), 400, code);
 }
@@ -67,7 +68,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 async function profileFor(user: { id: string; email?: string | null }): Promise<SessionUser> {
   const { data, error } = await supabase.from("rede_lua_profiles")
-    .select("display_name,role,xp,level,streak_days,bio,profile_title,avatar_style,avatar_seed,avatar_config,profile_theme,profile_visibility,favorite_subjects,moon_coins,account_status,profile_handle")
+    .select("display_name,role,xp,level,streak_days,bio,profile_title,avatar_style,avatar_seed,avatar_config,profile_theme,profile_visibility,favorite_subjects,moon_coins,account_status,profile_handle,life_number,life_xp,legacy_stars,best_level")
     .eq("user_id", user.id)
     .single();
   if (error) dbError(error);
@@ -90,6 +91,10 @@ async function profileFor(user: { id: string; email?: string | null }): Promise<
     moonCoins: Number(data.moon_coins || 0),
     accountStatus: (data.account_status || "active") as "active" | "suspended",
     profileHandle: data.profile_handle || undefined,
+    lifeNumber: Number(data.life_number || 1),
+    lifeXp: Number(data.life_xp || 0),
+    legacyStars: Number(data.legacy_stars || 0),
+    bestLevel: Number(data.best_level || data.level || 1),
   };
 }
 
@@ -558,6 +563,40 @@ export const api = {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       body: JSON.stringify(payload),
     });
+  },
+
+
+  recordsProfile: async (): Promise<RecordsProfile> => {
+    const { data, error } = await supabase.rpc("rede_lua_my_records");
+    if (error) dbError(error);
+    const life = data?.life || {};
+    const summary = data?.summary || {};
+    return {
+      life: {
+        number: Number(life.number || 1), xp: Number(life.xp || 0), level: Number(life.level || 1),
+        nextLifeXp: Number(life.nextLifeXp || 600), ready: Boolean(life.ready),
+        legacyStars: Number(life.legacyStars || 0), lastRebirthAt: life.lastRebirthAt || null,
+      },
+      summary: {
+        gamesCompleted: Number(summary.gamesCompleted || 0), answers: Number(summary.answers || 0),
+        correct: Number(summary.correct || 0), accuracy: Number(summary.accuracy || 0),
+        bestGameScore: Number(summary.bestGameScore || 0), largestRoom: Number(summary.largestRoom || 0),
+      },
+      records: (Array.isArray(data?.records) ? data.records : []).map((item:any)=>({
+        key:String(item.key), label:String(item.label || item.key), value:Number(item.value || 0), meta:item.meta || {}, achievedAt:item.achievedAt || item.achieved_at || new Date().toISOString(),
+      })),
+      history: (Array.isArray(data?.history) ? data.history : []).map((item:any)=>({
+        id:String(item.id), lifeNumber:Number(item.lifeNumber || 1), finalLifeXp:Number(item.finalLifeXp || 0),
+        legacyStarsEarned:Number(item.legacyStarsEarned || 0), avatarSnapshot:item.avatarSnapshot || {},
+        recordSnapshot:item.recordSnapshot || {}, endedAt:item.endedAt || new Date().toISOString(),
+      })),
+    };
+  },
+  beginNewLife: async (): Promise<NewLifeResult> => {
+    const { data, error } = await supabase.rpc("rede_lua_begin_new_life");
+    if (error) dbError(error);
+    trackEvent("profile", "new_life", String(data?.lifeNumber || ""));
+    return data as NewLifeResult;
   },
 
   books: (q: string) => request<{ books: Array<{ key: string; title: string; authors: string[]; year: number | null; coverUrl: string | null }> }>(`/api/discover/books?q=${encodeURIComponent(q)}`),

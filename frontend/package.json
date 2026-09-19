@@ -1,6 +1,6 @@
 {
   "name": "@redelua/educacao-web",
-  "version": "8.1.0",
+  "version": "9.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -20,7 +20,8 @@
     "animate.css": "4.1.1",
     "boring-avatars": "2.0.4",
     "canvas-confetti": "1.9.4",
-    "qrcode.react": "4.2.0"
+    "qrcode.react": "4.2.0",
+    "motion": "^13.4.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",

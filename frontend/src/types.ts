@@ -56,6 +56,10 @@ export type SessionUser = {
   moonCoins: number;
   accountStatus: "active" | "suspended";
   profileHandle?: string;
+  lifeNumber: number;
+  lifeXp: number;
+  legacyStars: number;
+  bestLevel: number;
 };
 
 export type SessionResponse = {
@@ -408,3 +412,52 @@ export type AdminContactMessage = {
   createdAt: string;
 };
 
+
+
+export type PersonalRecord = {
+  key: string;
+  label: string;
+  value: number;
+  meta: Record<string, unknown>;
+  achievedAt: string;
+};
+
+export type LifeHistoryEntry = {
+  id: string;
+  lifeNumber: number;
+  finalLifeXp: number;
+  legacyStarsEarned: number;
+  avatarSnapshot: Record<string, unknown>;
+  recordSnapshot: Record<string, unknown>;
+  endedAt: string;
+};
+
+export type RecordsProfile = {
+  life: {
+    number: number;
+    xp: number;
+    level: number;
+    nextLifeXp: number;
+    ready: boolean;
+    legacyStars: number;
+    lastRebirthAt: string | null;
+  };
+  summary: {
+    gamesCompleted: number;
+    answers: number;
+    correct: number;
+    accuracy: number;
+    bestGameScore: number;
+    largestRoom: number;
+  };
+  records: PersonalRecord[];
+  history: LifeHistoryEntry[];
+};
+
+export type NewLifeResult = {
+  ok: true;
+  lifeNumber: number;
+  legacyStarsEarned: number;
+  species: string;
+  message: string;
+};

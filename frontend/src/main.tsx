@@ -7,6 +7,7 @@ import "animate.css";
 import "./styles.css";
 import "./v8.css";
 import "./avatar-revolution.css";
+import "./v9.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {

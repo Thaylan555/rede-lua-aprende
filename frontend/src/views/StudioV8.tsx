@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, BarChart3, Check, Copy, Gamepad2, GraduationCap,
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { api } from "../api";
+import { useRegionalVoice } from "../regionalVoice";
 import { DEFAULT_GAME_CONFIG, DEFAULT_QUIZ_THEME, THEME_PRESETS } from "../quizTheme";
 import type { Difficulty, DraftQuestion, ExperienceMode, GameConfig, QuizTheme, SessionUser } from "../types";
 
@@ -32,6 +33,7 @@ const blankForm = (): StudioForm => ({
 
 export function StudioV8({ user, onLogin }: { user: SessionUser | null; onLogin: () => void }) {
   const canTeach = user?.role === "teacher" || user?.role === "admin";
+  const voice = useRegionalVoice();
   const qc = useQueryClient();
   const [tab, setTab] = useState<"create" | "library" | "insights">("create");
   const [step, setStep] = useState(0);
@@ -50,7 +52,7 @@ export function StudioV8({ user, onLogin }: { user: SessionUser | null; onLogin:
       tags: form.tags.split(",").map((v) => v.trim()).filter(Boolean).slice(0, 8), questions: form.questions,
       experienceMode: form.experienceMode, theme: form.theme, gameConfig: form.gameConfig,
     }),
-    onSuccess: async () => { toast.success("Experiência criada!"); setForm(blankForm()); setStep(0); setTab("library"); await qc.invalidateQueries({ queryKey: ["activities-v8"] }); await qc.invalidateQueries({ queryKey: ["creator-v8"] }); },
+    onSuccess: async () => { toast.success("Pronto! Esse trem virou experiência de verdade 😄"); setForm(blankForm()); setStep(0); setTab("library"); await qc.invalidateQueries({ queryKey: ["activities-v8"] }); await qc.invalidateQueries({ queryKey: ["creator-v8"] }); },
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -64,14 +66,14 @@ export function StudioV8({ user, onLogin }: { user: SessionUser | null; onLogin:
   const startGame = useMutation({ mutationFn: () => api.startGame(activeGameCode!), onSuccess: () => host.refetch(), onError: (e: Error) => toast.error(e.message) });
   const next = useMutation({ mutationFn: () => api.nextQuestion(activeGameCode!), onSuccess: () => host.refetch(), onError: (e: Error) => toast.error(e.message) });
 
-  if (!user) return <div className="v8-shell v8-gate"><div className="v8-gate-orb"><GraduationCap /></div><span>STUDIO DO PROFESSOR</span><h1>Crie a aula como quem monta um jogo.</h1><p>Escolha o formato, escreva as perguntas, ajuste o visual e abra a sala.</p><button className="v8-primary" onClick={onLogin}>Entrar como professor <ArrowRight /></button></div>;
+  if (!user) return <div className="v8-shell v8-gate"><div className="v8-gate-orb"><GraduationCap /></div><span>STUDIO DO PROFESSOR</span><h1>{voice.say("teacher")}</h1><p>Escolha o formato, escreva as perguntas, ajuste o visual e abra a sala.</p><button className="v8-primary" onClick={onLogin}>Entrar como professor <ArrowRight /></button></div>;
   if (!canTeach) return <div className="v8-shell v8-gate"><div className="v8-gate-orb"><GraduationCap /></div><span>STUDIO DO PROFESSOR</span><h1>Essa conta ainda é de aluno.</h1><p>Use um código de professor na tela de entrada para liberar o Studio.</p><button className="v8-primary" onClick={onLogin}>Ativar acesso de professor <ArrowRight /></button></div>;
 
   if (activeGameCode && host.data?.game) return <LiveRoom code={activeGameCode} host={host.data.game} onClose={() => setActiveGameCode(null)} onStart={() => startGame.mutate()} onNext={() => next.mutate()} busy={startGame.isPending || next.isPending} />;
 
   return <div className="v8-shell v8-studio">
     <header className="v8-studio-head">
-      <div><span className="v8-kicker"><WandSparkles /> STUDIO DO PROFESSOR</span><h1>Da ideia à sala em poucos passos.</h1><p>Você escolhe o tipo de experiência; a Rede Lua cuida do resto da estrutura.</p></div>
+      <div><span className="v8-kicker"><WandSparkles /> STUDIO DO PROFESSOR</span><h1>{voice.say("teacherHeader")}</h1><p>Você escolhe o tipo de experiência; a Rede Lua cuida do resto da estrutura.</p></div>
       <div className="v8-creator-level"><small>NÍVEL DE CRIADOR</small><strong>{creator.data?.stats.creatorLevel || 1}</strong><span>{creator.data?.stats.creatorXp || 0} XP</span></div>
     </header>
 

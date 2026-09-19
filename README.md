@@ -1,3 +1,8 @@
+
+## v9.0 — Universo 95
+
+A versão 9 reconstrói o frontend com novo shell, Recorde Lua, Nova Vida, Painel de Impacto, Modo Prosa regional e Motion. Veja `RELEASE-v9.md` e `VALIDATION-v9.md`.
+
 # Rede Lua na Educação — v8.0 Nova Plataforma
 
 A v8 deixa de tratar a Rede Lua apenas como um site de quizzes e começa a estrutura de uma **plataforma de aprendizado, criação e identidade digital escolar**.

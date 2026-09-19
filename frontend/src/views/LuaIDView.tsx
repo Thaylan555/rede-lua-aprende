@@ -147,14 +147,14 @@ export function LuaIDView({ user, onLogin }: { user: SessionUser | null; onLogin
 
   return <div className="v8-shell v8-luaid v81-avatar-revolution">
     <header className="v81-avatar-head">
-      <div><span className="v8-kicker"><MoonStar /> AVATAR REVOLUTION</span><h1>Seu LuaID agora parece <em>um personagem de verdade.</em></h1><p>Crie mascotes originais da Rede Lua, misture estilos, acessórios, companheiros, efeitos e cartões. Sem precisar usar foto real.</p></div>
+      <div><span className="v8-kicker"><MoonStar /> AVATAR REVOLUTION</span><h1>Seu LuaID virou <em>um personagem com história.</em></h1><p>Crie mascotes, misture estilos, acessórios, companheiros e efeitos. Quando chegar a hora, esse personagem pode renascer em uma Nova Vida sem apagar seu legado.</p></div>
       <button className="v81-surprise" onClick={surpriseMe}><Dices /><span><strong>Surpreenda-me</strong><small>gera um look inteiro</small></span></button>
     </header>
 
     <section className="v81-studio">
       <aside className="v81-preview-column" style={{ ["--id-accent" as string]: theme.accent, ["--id-surface" as string]: theme.surface, ["--id-bg" as string]: theme.background, ["--id-card" as string]: theme.card }}>
         <div className={`v8-id-card v81-id-card pattern-${theme.pattern}`}>
-          <div className="v8-id-cover"><span>LUAID • {user.role === "teacher" ? "PROFESSOR" : user.role === "admin" ? "GESTÃO" : "ALUNO"}</span><i>LV {level}</i></div>
+          <div className="v8-id-cover"><span>LUAID • {user.role === "teacher" ? "PROFESSOR" : user.role === "admin" ? "GESTÃO" : "ALUNO"} • VIDA {user.lifeNumber}</span><i>LV {level}</i></div>
           <div className="v8-id-avatar v81-id-avatar"><AvatarVisual style={avatarStyle} seed={avatarSeed} config={avatarConfig} size={320} /></div>
           <div className="v8-id-main"><small>@{handle || "seu_nome"}</small><h2>{displayName || "Seu nome"}</h2><span>{title || "Explorador Lunar"}</span><p>{bio || "Seu espaço para aprender, jogar e mostrar sua personalidade."}</p></div>
           <div className="v8-id-stats"><span><strong>{level}</strong><small>Nível</small></span><span><strong>{player?.gamesCompleted || 0}</strong><small>Missões</small></span><span><strong>{cosmetics.data?.coins ?? user.moonCoins}</strong><small>Luas</small></span></div>

@@ -3,10 +3,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, BrainCircuit, CheckCircle2, HelpCircle, Lightbulb, LoaderCircle, MoonStar, RefreshCcw, SkipForward, Sparkles, Trophy, UserRound, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "../api";
+import { useRegionalVoice } from "../regionalVoice";
 import type { PublicActivity, SessionUser, StudyState } from "../types";
 
 export function LearningV8({ user, onLogin, onLibrary }: { user: SessionUser | null; onLogin: () => void; onLibrary: () => void }) {
   const queryClient = useQueryClient();
+  const voice = useRegionalVoice();
   const [study, setStudy] = useState<StudyState | null>(null);
   const [pendingNext, setPendingNext] = useState<StudyState | null>(null);
   const [reflection, setReflection] = useState("");
@@ -45,7 +47,7 @@ export function LearningV8({ user, onLogin, onLibrary }: { user: SessionUser | n
   const mastery = useMemo(() => [...(constellation.data?.mastery || [])].sort((a, b) => a.masteryScore - b.masteryScore), [constellation.data?.mastery]);
   const recommended = recommendations.data?.activities || [];
 
-  if (!user) return <div className="v8-shell v8-gate"><div className="v8-gate-orb"><UserRound /></div><span>TRILHA LUNAR</span><h1>Seu caminho começa quando você entra.</h1><p>Com conta, a Rede Lua acompanha seu progresso e monta atividades para praticar sem entregar a resposta pronta.</p><button className="v8-primary" onClick={onLogin}>Entrar ou criar conta <ArrowRight /></button></div>;
+  if (!user) return <div className="v8-shell v8-gate"><div className="v8-gate-orb"><UserRound /></div><span>TRILHA LUNAR</span><h1>{voice.say("nextMission")}</h1><p>Com conta, a Rede Lua acompanha seu progresso e monta atividades para praticar sem entregar a resposta pronta.</p><button className="v8-primary" onClick={onLogin}>Entrar ou criar conta <ArrowRight /></button></div>;
 
   if (study) return <StudyPlayer
     study={study}
@@ -73,7 +75,7 @@ export function LearningV8({ user, onLogin, onLibrary }: { user: SessionUser | n
 
   return <div className="v8-shell v8-learn-dashboard">
     <header className="v8-learn-head">
-      <div><span className="v8-kicker"><MoonStar /> SUA TRILHA</span><h1>Hoje, o objetivo é <em>entender</em> — não só acertar.</h1><p>Você escolhe uma missão. Se errar, recebe uma pista. A resposta certa não aparece até você chegar nela.</p></div>
+      <div><span className="v8-kicker"><MoonStar /> SUA TRILHA</span><h1>{voice.say("learnHeader")}</h1><p>Você escolhe uma missão. Se errar, recebe uma pista. A resposta certa não aparece até você chegar nela.</p></div>
       <div className="v8-level-card"><small>NÍVEL</small><strong>{user.level}</strong><span>{user.xp.toLocaleString("pt-BR")} XP</span></div>
     </header>
 
@@ -86,7 +88,7 @@ export function LearningV8({ user, onLogin, onLibrary }: { user: SessionUser | n
     <section className="v8-learn-layout">
       <div className="v8-mission-board">
         <div className="v8-panel-title"><div><span>MISSÕES PARA AGORA</span><h2>Escolha uma e comece.</h2></div><Lightbulb /></div>
-        {recommendations.isLoading ? <div className="v8-loading"><LoaderCircle className="spin" /> Preparando missões…</div> : recommended.length ? <div className="v8-learning-cards">{recommended.slice(0, 6).map((activity, i) => <LearningCard key={activity.id} activity={activity} index={i} onStart={() => start.mutate(activity.id)} loading={start.isPending} />)}</div> : <div className="v8-empty"><Sparkles /><strong>Ainda não tem missão publicada por aqui.</strong><p>Você pode explorar a biblioteca enquanto os professores montam novas atividades.</p><button onClick={onLibrary}>Abrir biblioteca <ArrowRight /></button></div>}
+        {recommendations.isLoading ? <div className="v8-loading"><LoaderCircle className="spin" /> Preparando missões…</div> : recommended.length ? <div className="v8-learning-cards">{recommended.slice(0, 6).map((activity, i) => <LearningCard key={activity.id} activity={activity} index={i} onStart={() => start.mutate(activity.id)} loading={start.isPending} />)}</div> : <div className="v8-empty"><Sparkles /><strong>{voice.say("empty")}</strong><p>Você pode explorar a biblioteca enquanto os professores montam novas atividades.</p><button onClick={onLibrary}>Abrir biblioteca <ArrowRight /></button></div>}
       </div>
 
       <aside className="v8-skill-radar">
