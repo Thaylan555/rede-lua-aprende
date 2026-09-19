@@ -25,11 +25,13 @@ export type AvatarKit = {
 };
 
 export const AVATAR_KITS: AvatarKit[] = [
-  { id: "capivara-lunar", label: "Capivara Lunar", tagline: "Mascote tranquilo com cara de Rede Lua.", style: "lua-mates", config: { _luaSpecies: "lunar-capybara", _luaExpression: "happy", _luaOutfit: "academy", _luaCompanion: "book-sprite", _luaHead: "scholar-cap", _luaAura: "stars", _luaFrame: "royal" }, theme: { accent: "#ffca43", surface: "#174b91", background: "#071c45", card: "#fffaf0", pattern: "stars" } },
-  { id: "dragao-arcade", label: "Dragão Arcade", tagline: "Criatura de game com energia neon.", style: "lua-mates", config: { _luaSpecies: "pocket-dragon", _luaExpression: "confident", _luaOutfit: "arcade", _luaCompanion: "star-buddy", _luaHead: "headset", _luaAura: "pixels", _luaFrame: "arcade" }, theme: { accent: "#35f2b5", surface: "#7447e7", background: "#090c22", card: "#fffdf6", pattern: "grid" } },
-  { id: "pinguim-cientista", label: "Pinguim Cientista", tagline: "Laboratório, curiosidade e um livro vivo.", style: "lua-mates", config: { _luaSpecies: "cosmic-penguin", _luaExpression: "curious", _luaOutfit: "science", _luaCompanion: "book-sprite", _luaHead: "scholar-cap", _luaFace: "round-glasses", _luaAura: "cosmic", _luaFrame: "frost" }, theme: { accent: "#65e9ff", surface: "#244a80", background: "#081a34", card: "#f8fdff", pattern: "orbit" } },
-  { id: "raposa-pirata", label: "Raposa Pirata", tagline: "Aventura, mapa e tapa-olho sem copiar ninguém.", style: "lua-mates", config: { _luaSpecies: "nebula-fox", _luaExpression: "confident", _luaOutfit: "pirate", _luaCompanion: "mini-moon", _luaHead: "pirate-hat", _luaFace: "eyepatch", _luaAura: "comet", _luaFrame: "pirate" }, theme: { accent: "#ffc83d", surface: "#273a69", background: "#10182f", card: "#fff9ea", pattern: "stars" } },
-  { id: "axolote-prisma", label: "Axolote Prisma", tagline: "Fofo, estranho e impossível de confundir.", style: "lua-mates", config: { _luaSpecies: "prism-axolotl", _luaExpression: "surprised", _luaOutfit: "space", _luaCompanion: "planet-buddy", _luaHead: "classic-crown", _luaFace: "prism-glasses", _luaAura: "hearts", _luaFrame: "candy" }, theme: { accent: "#ff6fb5", surface: "#6a4cd5", background: "#221249", card: "#fff7fc", pattern: "orbit" } },
+  { id: "capivara-lunar", label: "Capivara Lunar", tagline: "Mascote tranquilo com cara de Rede Lua.", style: "lua-mates", config: { _luaSpecies: "lunar-capybara", _luaExpression: "happy", _luaEyes: "spark", _luaMark: "blush", _luaOutfit: "academy", _luaCompanion: "book-sprite", _luaHead: "scholar-cap", _luaAura: "stars", _luaFrame: "royal" }, theme: { accent: "#ffca43", surface: "#174b91", background: "#071c45", card: "#fffaf0", pattern: "stars" } },
+  { id: "dragao-arcade", label: "Dragão Arcade", tagline: "Criatura de game com energia neon.", style: "lua-mates", config: { _luaSpecies: "pocket-dragon", _luaExpression: "confident", _luaEyes: "bold", _luaMark: "star", _luaOutfit: "arcade", _luaCompanion: "star-buddy", _luaHead: "headset", _luaAura: "pixels", _luaFrame: "arcade" }, theme: { accent: "#35f2b5", surface: "#7447e7", background: "#090c22", card: "#fffdf6", pattern: "grid" } },
+  { id: "pinguim-cientista", label: "Pinguim Cientista", tagline: "Laboratório, curiosidade e um livro vivo.", style: "lua-mates", config: { _luaSpecies: "cosmic-penguin", _luaExpression: "curious", _luaEyes: "round", _luaMark: "none", _luaOutfit: "science", _luaCompanion: "book-sprite", _luaHead: "scholar-cap", _luaFace: "round-glasses", _luaAura: "cosmic", _luaFrame: "frost" }, theme: { accent: "#65e9ff", surface: "#244a80", background: "#081a34", card: "#f8fdff", pattern: "orbit" } },
+  { id: "raposa-pirata", label: "Raposa Pirata", tagline: "Aventura, mapa e tapa-olho sem copiar ninguém.", style: "lua-mates", config: { _luaSpecies: "nebula-fox", _luaExpression: "confident", _luaEyes: "bold", _luaMark: "freckles", _luaOutfit: "pirate", _luaCompanion: "mini-moon", _luaHead: "pirate-hat", _luaFace: "eyepatch", _luaAura: "comet", _luaFrame: "pirate" }, theme: { accent: "#ffc83d", surface: "#273a69", background: "#10182f", card: "#fff9ea", pattern: "stars" } },
+  { id: "axolote-prisma", label: "Axolote Prisma", tagline: "Fofo, estranho e impossível de confundir.", style: "lua-mates", config: { _luaSpecies: "prism-axolotl", _luaExpression: "surprised", _luaEyes: "spark", _luaMark: "blush", _luaOutfit: "space", _luaCompanion: "planet-buddy", _luaHead: "classic-crown", _luaFace: "prism-glasses", _luaAura: "hearts", _luaFrame: "candy" }, theme: { accent: "#ff6fb5", surface: "#6a4cd5", background: "#221249", card: "#fff7fc", pattern: "orbit" } },
+  { id: "panda-pop", label: "Panda Pop", tagline: "Panda expressivo com confete e look de criador.", style: "lua-mates", config: { _luaSpecies: "panda-pop", _luaExpression: "happy", _luaEyes: "spark", _luaMark: "blush", _luaOutfit: "arcade", _luaCompanion: "star-buddy", _luaHead: "party-hat", _luaAura: "confetti", _luaFrame: "candy" }, theme: { accent: "#ff6ba8", surface: "#5b43d8", background: "#171238", card: "#fff8fd", pattern: "orbit" } },
+  { id: "guaxinim-gamer", label: "Guaxinim Gamer", tagline: "Headset, olhos marcantes e energia de campeonato.", style: "lua-mates", config: { _luaSpecies: "raccoon-moon", _luaExpression: "confident", _luaEyes: "bold", _luaMark: "none", _luaOutfit: "arcade", _luaCompanion: "robot-pet", _luaHead: "headset", _luaAura: "neon", _luaFrame: "tech" }, theme: { accent: "#35e3ff", surface: "#184b9e", background: "#08142d", card: "#f8fcff", pattern: "grid" } },
   { id: "pirata-lunar", label: "Pirata Lunar", tagline: "Tapa-olho, chapéu e clima de aventura.", style: "avataaars", config: { _luaHead: "pirate-hat", _luaFace: "eyepatch", _luaAura: "stars", _luaFrame: "pirate" }, theme: { accent: "#ffc83d", surface: "#12274c", background: "#07162f", card: "#fffaf0", pattern: "stars" } },
   { id: "robo-neon", label: "Robô Neon", tagline: "Metal, luzes e energia futurista.", style: "bottts", config: { _luaHead: "robot-antenna", _luaFace: "none", _luaAura: "neon", _luaFrame: "tech" }, theme: { accent: "#39e4ff", surface: "#172756", background: "#080d25", card: "#f6fbff", pattern: "grid" } },
   { id: "gamer-pixel", label: "Gamer Pixel", tagline: "Headset e visual de jogo retrô.", style: "pixel-art", config: { _luaHead: "headset", _luaFace: "none", _luaAura: "pixels", _luaFrame: "arcade" }, theme: { accent: "#ffcf3e", surface: "#6a44dc", background: "#181036", card: "#fffdf5", pattern: "grid" } },
@@ -45,10 +47,19 @@ export const LUA_MATE_SPECIES = [
   ["lunar-capybara", "Capivara Lunar", "🟤"], ["wise-owl", "Coruja Sábia", "🦉"], ["pocket-dragon", "Dragão de Bolso", "🐲"],
   ["orbit-robot", "Robô Órbita", "🤖"], ["astro-cat", "Gato Astro", "🐱"], ["prism-axolotl", "Axolote Prisma", "🩷"],
   ["star-bunny", "Coelho Estelar", "🐰"], ["comet-monkey", "Macaco Cometa", "🐵"], ["cloud-yeti", "Yeti Nuvem", "☁️"],
+  ["panda-pop", "Panda Pop", "🐼"], ["frog-orbit", "Sapo Órbita", "🐸"], ["otter-wave", "Lontra Onda", "🦦"], ["raccoon-moon", "Guaxinim Lunar", "🦝"],
 ] as const;
 
 export const LUA_EXPRESSIONS = [
   ["happy", "Feliz", "😄"], ["curious", "Curioso", "🤔"], ["confident", "Confiante", "😏"], ["surprised", "Surpreso", "😮"],
+] as const;
+
+export const LUA_EYES = [
+  ["spark", "Brilho", "✨"], ["round", "Redondo", "●"], ["soft", "Suave", "◉"], ["bold", "Marcante", "👀"],
+] as const;
+
+export const LUA_MARKS = [
+  ["blush", "Bochecha", "🌸"], ["freckles", "Sardinhas", "••"], ["star", "Estrela", "⭐"], ["none", "Limpo", "—"],
 ] as const;
 
 export const LUA_OUTFITS = [

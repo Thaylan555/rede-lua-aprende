@@ -82,3 +82,6 @@ Veja também `EMAIL-REDE-LUA.md`, `ARCHITECTURE.md` e `RELEASE-v8.md`.
 
 ## v8.1 — Avatar Revolution
 O LuaID agora inclui os **LuaMates**, mascotes originais da Rede Lua, um Avatar Studio em abas, companheiros, novas peças, efeitos, inventário e uma API própria de avatar. Veja `RELEASE-v8.1.md`.
+
+## v9.1 — Lunar Playground
+Interface final renovada, LuaID 2.0 e LuaMates redesenhados. Veja `RELEASE-v9.1.md`.

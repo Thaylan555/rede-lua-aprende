@@ -8,6 +8,7 @@ import "./styles.css";
 import "./v8.css";
 import "./avatar-revolution.css";
 import "./v9.css";
+import "./v91.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
