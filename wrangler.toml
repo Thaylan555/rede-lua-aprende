@@ -8,3 +8,7 @@ pages_build_output_dir = "frontend/dist"
 # RESEND_API_KEY (secret, opcional para envio do formulário)
 # CONTACT_TO_EMAIL / CONTACT_FROM_EMAIL
 # As VITE_* são variáveis de build do frontend.
+
+# Avatar AI (backend)
+# POLLINATIONS_BASE_URL / POLLINATIONS_MODEL
+# POLLINATIONS_TOKEN (secret, opcional)

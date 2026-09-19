@@ -1,0 +1,35 @@
+Rede Lua Educação v9.3 — comandos rápidos (Termux)
+
+1) Entrar no projeto
+cd ~/projetos/rede-lua-aprende
+
+2) Fazer backup local rápido (opcional)
+git status
+git add . && git commit -m "Backup antes da v9.3" || true
+
+3) Aplicar o PATCH baixado
+unzip -o ~/storage/downloads/RedeLuaEducacao-v9.3-AvatarAI-Notificacoes-PATCH.zip -d .
+
+4) Conferir arquivos alterados
+git status
+
+5) Testar localmente se quiser
+npm install
+npm run typecheck
+npm run build
+
+6) Enviar ao GitHub
+git add .
+git commit -m "Rede Lua v9.3 Avatar AI e notificacoes de Nova Vida"
+git push origin main
+
+SUPABASE
+A migration v9.3 já foi aplicada no projeto Supabase conectado.
+Não rode a migration manualmente de novo nesse mesmo projeto.
+
+CLOUDFLARE PAGES/FUNCTIONS
+POLLINATIONS_BASE_URL=https://image.pollinations.ai/prompt
+POLLINATIONS_MODEL=flux
+POLLINATIONS_TOKEN=   (opcional; configure como Secret se tiver um token)
+
+As variáveis SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY e SUPABASE_SERVICE_ROLE_KEY continuam necessárias no backend.

@@ -63,6 +63,7 @@ export function LuaIDView({ user, onLogin }: { user: SessionUser | null; onLogin
   const [theme, setTheme] = useState<ProfileTheme>(user?.profileTheme || themes[0].theme);
   const [visibility, setVisibility] = useState<"private" | "classroom">(user?.profileVisibility || "private");
   const [favorites, setFavorites] = useState<string[]>(user?.favoriteSubjects || []);
+  const [aiPreview, setAiPreview] = useState<{ imageDataUrl: string; prompt: string; summary: string; remoteUrl: string; generatedAt?: string | null } | null>(user?.avatarAiImageUrl ? { imageDataUrl: user.avatarAiImageUrl, prompt: user.avatarAiPrompt || "", summary: "", remoteUrl: user.avatarAiImageUrl, generatedAt: user.avatarAiGeneratedAt || null } : null);
 
   useEffect(() => {
     if (!user) return;
@@ -75,6 +76,7 @@ export function LuaIDView({ user, onLogin }: { user: SessionUser | null; onLogin
     setTheme(user.profileTheme);
     setVisibility(user.profileVisibility);
     setFavorites(user.favoriteSubjects);
+    setAiPreview(user.avatarAiImageUrl ? { imageDataUrl: user.avatarAiImageUrl, prompt: user.avatarAiPrompt || "", summary: "", remoteUrl: user.avatarAiImageUrl, generatedAt: user.avatarAiGeneratedAt || null } : null);
     setHandle(user.profileHandle || manifest.data?.handle || "");
   }, [user?.id]);
   useEffect(() => { if (manifest.data?.handle) setHandle(manifest.data.handle); }, [manifest.data?.handle]);
@@ -160,6 +162,27 @@ export function LuaIDView({ user, onLogin }: { user: SessionUser | null; onLogin
     toast.success(`${item.label} aplicado.`);
   };
 
+  const generateAiAvatar = useMutation({
+    mutationFn: () => api.avatarAiEnhance({
+      avatarStyle,
+      avatarSeed,
+      avatarConfig,
+      displayName,
+      profileTitle: title,
+      bio,
+      lifeNumber: user.lifeNumber,
+      legacyStars: user.legacyStars,
+      savePreview: true,
+    }),
+    onSuccess: async (result) => {
+      setAiPreview({ imageDataUrl: result.imageDataUrl, prompt: result.prompt, summary: result.summary, remoteUrl: result.remoteUrl, generatedAt: result.stored?.generatedAt || new Date().toISOString() });
+      await qc.invalidateQueries({ queryKey: ["session"] });
+      toast.success("A versão IA do seu avatar ficou pronta ✨");
+      celebrate(100);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const save = useMutation({
     mutationFn: async () => {
       const issue = profileTextIssue({ displayName, bio, profileTitle: title });
@@ -237,6 +260,32 @@ export function LuaIDView({ user, onLogin }: { user: SessionUser | null; onLogin
                 <div className="v91-look-avatar"><AvatarVisual style={kit.style} seed={`kit-${kit.id}`} config={kit.config} size={150} /></div>
                 <strong>{kit.label}</strong><small>{kit.tagline}</small>{avatarConfig._luaLook === kit.id && <i><Check /></i>}
               </button>)}</div>
+            </Panel>
+
+            <Panel title="Versão IA do seu avatar" subtitle="A nossa API monta o prompt sozinha e já mostra a imagem real gerada" icon={<WandSparkles />}>
+              <div className="v93-ai-avatar-panel">
+                <div className="v93-ai-preview-grid">
+                  <article>
+                    <span>Base do LuaID</span>
+                    <div className="v93-ai-preview-card"><AvatarVisual style={avatarStyle} seed={avatarSeed} config={avatarConfig} size={220} /></div>
+                  </article>
+                  <article>
+                    <span>Prévia real da IA</span>
+                    <div className={`v93-ai-preview-card ${aiPreview ? 'ready' : 'empty'}`}>
+                      {generateAiAvatar.isPending ? <div className="v93-ai-loading"><LoaderCircle className="spin" /><b>Gerando seu avatar...</b><small>Isso pode levar alguns segundinhos.</small></div> : aiPreview ? <img src={aiPreview.imageDataUrl} alt="Prévia gerada por IA do avatar" loading="lazy" /> : <div className="v93-ai-empty"><WandSparkles /><b>Ainda sem imagem real</b><small>Toque em gerar para a IA transformar o avatar em uma arte pronta.</small></div>}
+                    </div>
+                  </article>
+                </div>
+                <div className="v93-ai-actions">
+                  <button onClick={() => generateAiAvatar.mutate()} disabled={generateAiAvatar.isPending}>{generateAiAvatar.isPending ? <LoaderCircle className="spin" /> : <Sparkles />} {aiPreview ? "Gerar novamente" : "Gerar imagem real"}</button>
+                  {aiPreview?.remoteUrl && <a href={aiPreview.remoteUrl} target="_blank" rel="noreferrer">Abrir original</a>}
+                </div>
+                <div className="v93-ai-prompt-box">
+                  <strong>Prompt automático da API</strong>
+                  <p>Ele é montado com o seu estilo, peças, vida atual, nome e título. Você não precisa escrever nada manualmente.</p>
+                  <textarea readOnly value={aiPreview?.prompt || "Quando você gerar, o prompt automático vai aparecer aqui."} />
+                </div>
+              </div>
             </Panel>
 
             <Panel title="Família do personagem" subtitle="Mascote próprio ou estilos open source" icon={<Gamepad2 />}>

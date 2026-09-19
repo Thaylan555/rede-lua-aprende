@@ -153,6 +153,114 @@ async function supabaseRpc(c: any, name: string, body: unknown, authorization?: 
   return { ok: true as const, status: response.status, data: await response.json() };
 }
 
+
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+  const bytes = new Uint8Array(buffer);
+  const chunk = 0x8000;
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
+}
+
+const luaLabelMap = {
+  species: {
+    "moon-bear": "urso lunar",
+    "nebula-fox": "raposa nebular",
+    "cosmic-penguin": "pinguim cósmico",
+    "lunar-capybara": "capivara lunar",
+    "wise-owl": "coruja sábia",
+    "pocket-dragon": "dragão de bolso",
+    "orbit-robot": "robô órbita",
+    "astro-cat": "gato astro",
+    "prism-axolotl": "axolote prisma",
+    "star-bunny": "coelho estelar",
+    "comet-monkey": "macaco cometa",
+    "cloud-yeti": "yeti nuvem",
+    "panda-pop": "panda pop",
+    "frog-orbit": "sapo órbita",
+    "otter-wave": "lontra onda",
+    "raccoon-moon": "guaxinim lunar",
+    "sun-lion": "leão solar",
+    "forest-deer": "cervo aurora",
+    "midnight-wolf": "lobo eclipse",
+    "rocket-chicken": "galinha foguete",
+    "crystal-unicorn": "unicórnio cristal",
+    "moon-skull": "caveira lunar",
+    "planet-pal": "planeta vivo",
+    "tiny-alien": "alienzinho lunar",
+  } as Record<string, string>,
+  expression: {
+    happy: "feliz", curious: "curioso", confident: "confiante", surprised: "surpreso",
+    sleepy: "com sono", focused: "focado", mischief: "travesso", victory: "vitorioso",
+  } as Record<string, string>,
+  eyes: { spark: "olhos brilhantes", round: "olhos redondos", soft: "olhos suaves", bold: "olhos marcantes", star: "olhos em estrela", pixel: "olhos pixel" } as Record<string, string>,
+  marking: { none: "sem marca", blush: "bochechas coradas", freckles: "sardinhas", star: "marca de estrela", stripe: "faixa facial", moon: "marca de lua" } as Record<string, string>,
+  outfit: { academy: "uniforme academia lunar", space: "roupa espacial", science: "roupa de laboratório", arcade: "roupa arcade", pirate: "roupa pirata", street: "roupa street", royal: "roupa real", hero: "roupa de herói" } as Record<string, string>,
+  head: { none: "", crown: "coroa", headset: "headset gamer", "flower-crown": "coroa de flores", "scholar-cap": "capelo acadêmico", "pirate-hat": "chapéu pirata", "space-helmet": "capacete espacial", "wizard-hat": "chapéu de mago" } as Record<string, string>,
+  face: { none: "", eyepatch: "tapa-olho", "round-glasses": "óculos redondos", "star-glasses": "óculos em estrela", "neon-visor": "visor neon", moustache: "bigode divertido" } as Record<string, string>,
+  aura: { none: "", stars: "aura de estrelas", confetti: "aura de confete", hearts: "aura de corações", cosmic: "aura cósmica", neon: "aura neon" } as Record<string, string>,
+  frame: { none: "", classic: "moldura clássica", royal: "moldura real", arcade: "moldura arcade", frost: "moldura gelo", cosmic: "moldura cósmica" } as Record<string, string>,
+  companion: { none: "", "mini-moon": "mini lua flutuante", "book-sprite": "livro vivo", "robot-pet": "robô pet", "planet-buddy": "planetinha", "star-buddy": "estrelinha" } as Record<string, string>,
+  background: { aurora: "fundo aurora", stars: "céu estrelado", arcade: "fundo arcade", sunset: "pôr do sol", forest: "floresta", clean: "fundo limpo" } as Record<string, string>,
+};
+
+function describeLuaValue(group: keyof typeof luaLabelMap, value: unknown) {
+  if (typeof value !== "string" || !value) return "";
+  return luaLabelMap[group][value] || value.replace(/[-_]/g, " ");
+}
+
+function buildAvatarAiPrompt(payload: {
+  avatarStyle: string;
+  avatarConfig?: Record<string, unknown>;
+  displayName?: string;
+  profileTitle?: string;
+  bio?: string;
+  lifeNumber?: number;
+  legacyStars?: number;
+}) {
+  const config = payload.avatarConfig || {};
+  const name = payload.displayName?.trim() || "estudante da Rede Lua";
+  const title = payload.profileTitle?.trim() || "Explorador Lunar";
+  const bio = payload.bio?.trim() || "";
+  const style = payload.avatarStyle || "lua-mates";
+
+  const lookBits = style === "lua-mates"
+    ? [
+        describeLuaValue("species", config._luaSpecies),
+        describeLuaValue("expression", config._luaExpression),
+        describeLuaValue("eyes", config._luaEyes),
+        describeLuaValue("marking", config._luaMark),
+        describeLuaValue("outfit", config._luaOutfit),
+        describeLuaValue("head", config._luaHead),
+        describeLuaValue("face", config._luaFace),
+        describeLuaValue("aura", config._luaAura),
+        describeLuaValue("frame", config._luaFrame),
+        describeLuaValue("companion", config._luaCompanion),
+        describeLuaValue("background", config._luaBackdrop),
+      ].filter(Boolean).join(", ")
+    : `avatar em estilo ${style.replace(/[-_]/g, " ")}`;
+
+  const lifeText = payload.lifeNumber ? `Vida ${payload.lifeNumber}` : "";
+  const legacyText = payload.legacyStars ? `${payload.legacyStars} estrelas de legado` : "";
+  const persona = [name, title, lifeText, legacyText].filter(Boolean).join(" • ");
+  const mood = bio ? `A bio do perfil sugere: ${bio}.` : "";
+
+  const prompt = [
+    "Crie um retrato vertical 2D/2.5D de avatar original para a plataforma educacional brasileira Rede Lua na Educação.",
+    `O personagem representa ${persona || "um estudante criativo da Rede Lua"}.`,
+    style === "lua-mates"
+      ? `Use como base visual: ${lookBits}.`
+      : `Use um visual original e amigável inspirado no estilo ${style.replace(/[-_]/g, " ")}, sem copiar personagens famosos.` ,
+    "Mantenha aparência de mascote/cartoon premium, traço limpo, iluminação suave, composição central, fundo elegante e coerente com educação, criatividade e universo espacial.",
+    "Mostre o personagem inteiro ou quase inteiro, com leitura clara do rosto e dos acessórios, sem texto, sem marca d'água, sem logo.",
+    mood,
+  ].filter(Boolean).join(" ");
+
+  return { prompt, summary: lookBits || style };
+}
+
 app.get("/luaid/me", async (c) => {
   const authorization = c.req.header("Authorization");
   if (!authorization?.startsWith("Bearer ")) return c.json({ error: "AUTH_REQUIRED", message: "Entre para abrir seu LuaID." }, 401);
@@ -242,6 +350,111 @@ app.get("/luaid/avatar/:style/:seed.svg", async (c) => {
   c.header("Content-Type", "image/svg+xml; charset=utf-8");
   c.header("Cache-Control", "public, max-age=86400, s-maxage=604800");
   return c.body(await response.text());
+});
+
+
+const avatarEnhanceSchema = z.object({
+  avatarStyle: z.string().trim().min(2).max(40),
+  avatarSeed: z.string().trim().min(2).max(120).optional(),
+  avatarConfig: z.record(z.union([z.string(), z.number(), z.boolean(), z.array(z.string())])).default({}),
+  displayName: z.string().trim().max(80).optional(),
+  profileTitle: z.string().trim().max(80).optional(),
+  bio: z.string().trim().max(240).optional(),
+  lifeNumber: z.number().int().min(1).max(999).optional(),
+  legacyStars: z.number().int().min(0).max(99999).optional(),
+  savePreview: z.boolean().optional(),
+});
+
+app.post("/avatar/v2/enhance", async (c) => {
+  const authorization = c.req.header("Authorization");
+  if (!authorization?.startsWith("Bearer ")) return c.json({ error: "AUTH_REQUIRED", message: "Entre para gerar a versão IA do avatar." }, 401);
+
+  const payload = avatarEnhanceSchema.parse(await c.req.json());
+  const built = buildAvatarAiPrompt(payload);
+  const seed = payload.avatarSeed || crypto.randomUUID();
+  const base = (c.env.POLLINATIONS_BASE_URL || "https://image.pollinations.ai/prompt").replace(/\/$/, "");
+  const model = c.env.POLLINATIONS_MODEL || "flux";
+  const params = new URLSearchParams({
+    width: "768",
+    height: "768",
+    model,
+    seed,
+    safe: "true",
+    enhance: "true",
+  });
+  if (c.env.POLLINATIONS_TOKEN) {
+    params.set("nologo", "true");
+    params.set("private", "true");
+  }
+  const remoteUrl = `${base}/${encodeURIComponent(built.prompt)}?${params.toString()}`;
+  const headers: Record<string, string> = { Accept: "image/png,image/jpeg,image/webp;q=0.9,*/*;q=0.8" };
+  if (c.env.POLLINATIONS_TOKEN) headers.Authorization = `Bearer ${c.env.POLLINATIONS_TOKEN}`;
+
+  const imageResponse = await fetch(remoteUrl, { headers, signal: AbortSignal.timeout(45000) });
+  if (!imageResponse.ok) {
+    const detail = await imageResponse.text().catch(() => "");
+    console.error("avatar_ai_error", imageResponse.status, detail.slice(0, 300));
+    return c.json({ error: "AVATAR_AI_UNAVAILABLE", message: "A IA de avatar não respondeu agora. Tenta de novo já já." }, 502);
+  }
+
+  const contentType = imageResponse.headers.get("content-type") || "image/png";
+  const imageBase64 = arrayBufferToBase64(await imageResponse.arrayBuffer());
+  const imageDataUrl = `data:${contentType};base64,${imageBase64}`;
+
+  let stored: any = null;
+  if (payload.savePreview !== false) {
+    const saved = await supabaseRpc(c, "rede_lua_set_avatar_ai_preview", {
+      p_prompt: built.prompt,
+      // A imagem é entregue diretamente ao frontend. Não salvamos a URL de geração
+      // para evitar regenerar a imagem a cada abertura do perfil no tier gratuito.
+      p_image_url: "",
+      p_seed: seed,
+      p_provider: "pollinations",
+    }, authorization);
+    if (saved.ok) stored = saved.data;
+  }
+
+  c.header("Cache-Control", "no-store");
+  return c.json({
+    ok: true,
+    seed,
+    prompt: built.prompt,
+    summary: built.summary,
+    provider: "pollinations",
+    model,
+    remoteUrl,
+    imageDataUrl,
+    stored,
+  });
+});
+
+app.get("/notifications/me", async (c) => {
+  const authorization = c.req.header("Authorization");
+  if (!authorization?.startsWith("Bearer ")) return c.json({ error: "AUTH_REQUIRED", message: "Entre para ver seus avisos." }, 401);
+  const result = await supabaseRpc(c, "rede_lua_my_notifications", {}, authorization);
+  if (!result.ok) return c.json({ error: "NOTIFICATIONS_UNAVAILABLE", message: "Não foi possível carregar os avisos." }, result.status === 401 ? 401 : 502);
+  c.header("Cache-Control", "private, no-store");
+  return c.json({ notifications: Array.isArray(result.data) ? result.data : [] });
+});
+
+app.post("/notifications/:id/ping", async (c) => {
+  const authorization = c.req.header("Authorization");
+  if (!authorization?.startsWith("Bearer ")) return c.json({ error: "AUTH_REQUIRED", message: "Entre para ver seus avisos." }, 401);
+  const id = z.string().uuid().parse(c.req.param("id"));
+  const result = await supabaseRpc(c, "rede_lua_notification_ping", { p_notification_id: id }, authorization);
+  if (!result.ok) return c.json({ error: "NOTIFICATION_UNAVAILABLE", message: "Não foi possível atualizar esse aviso." }, result.status === 401 ? 401 : 502);
+  c.header("Cache-Control", "private, no-store");
+  return c.json(result.data);
+});
+
+app.post("/notifications/:id/ack", async (c) => {
+  const authorization = c.req.header("Authorization");
+  if (!authorization?.startsWith("Bearer ")) return c.json({ error: "AUTH_REQUIRED", message: "Entre para ver seus avisos." }, 401);
+  const id = z.string().uuid().parse(c.req.param("id"));
+  const result = await supabaseRpc(c, "rede_lua_notification_ack", { p_notification_id: id }, authorization);
+  if (!result.ok) return c.json({ error: "NOTIFICATION_UNAVAILABLE", message: "Não foi possível concluir esse aviso." }, result.status === 401 ? 401 : 502);
+  c.header("Cache-Control", "private, no-store");
+  return c.json(result.data);
 });
 
 const contactSchema = z.object({

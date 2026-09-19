@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 import { trackEvent } from "./analytics";
 import { normalizeGameConfig, normalizeQuizTheme } from "./quizTheme";
-import type { Activity, AvatarConfig, AvatarStyle, Difficulty, DraftQuestion, ExperienceMode, ForgeQuestion, GameConfig, GameReaction, GameState, HostGame, ParticipantSession, ProfileTheme, PublicActivity, QuizTheme, Role, SessionResponse, SessionUser, StudentConstellation, TeacherRadar, CreatorProfile, SharedForgeQuestion, PlayerProfile, CosmeticsState, AdminDashboard, AdminUserRow, AdminAnnouncement, FeatureFlag, TeacherInviteAdmin, AdminAuditEntry, CosmeticCatalogItem, AdminActivityRow, StudyState, StudyAttemptResult, LuaIdManifest, ContactPayload, AdminContactMessage, RecordsProfile, NewLifeResult } from "./types";
+import type { Activity, AvatarAiPreviewResult, AvatarConfig, AvatarStyle, Difficulty, DraftQuestion, ExperienceMode, ForgeQuestion, GameConfig, GameReaction, GameState, HostGame, ParticipantSession, ProfileTheme, PublicActivity, QuizTheme, Role, SessionResponse, SessionUser, StudentConstellation, TeacherRadar, CreatorProfile, SharedForgeQuestion, PlayerProfile, CosmeticsState, AdminDashboard, AdminUserRow, AdminAnnouncement, FeatureFlag, TeacherInviteAdmin, AdminAuditEntry, CosmeticCatalogItem, AdminActivityRow, StudyState, StudyAttemptResult, LuaIdManifest, ContactPayload, AdminContactMessage, RecordsProfile, NewLifeResult, UserNotification } from "./types";
 
 class ApiError extends Error {
   status: number;
@@ -29,6 +29,7 @@ const messageFor = (message?: string) => {
     INVALID_PROFILE_TITLE: "Escolha um título de perfil válido.",
     BIO_TOO_LONG: "A bio pode ter até 220 caracteres.",
     PROFILE_TEXT_NOT_ALLOWED: "Esse texto não combina com um espaço escolar. Ajuste o nome, título ou bio e tente de novo.",
+    AVATAR_AI_UNAVAILABLE: "A IA de avatar não respondeu agora. Tenta de novo já já.",
     INVALID_EXPERIENCE_MODE: "Escolha um formato de atividade válido.",
     ADMIN_REQUIRED: "Esta área é exclusiva da gestão da Rede Lua.",
     CANNOT_SUSPEND_SELF: "Você não pode suspender sua própria conta administrativa.",
@@ -51,7 +52,7 @@ function dbError(error: any): never {
     GAME_NOT_STARTABLE: 1, GAME_NOT_RUNNING: 1, INVALID_PARTICIPANT: 1, ACTIVITY_NOT_FOUND: 1,
     AUTH_REQUIRED: 1, INVALID_AVATAR_STYLE: 1, INVALID_PROFILE_TITLE: 1, BIO_TOO_LONG: 1, INVALID_EXPERIENCE_MODE: 1,
     ADMIN_REQUIRED: 1, CANNOT_SUSPEND_SELF: 1, ADMIN_ROLE_PROTECTED: 1, SUPER_ADMIN_PROTECTED: 1, INVITE_CODE_TOO_SHORT: 1,
-    FLAG_NOT_FOUND: 1, COSMETIC_NOT_FOUND: 1, COSMETIC_LEVEL_REQUIRED: 1, NOT_ENOUGH_MOON_COINS: 1, PROFILE_TEXT_NOT_ALLOWED: 1, LIFE_NOT_READY: 1,
+    FLAG_NOT_FOUND: 1, COSMETIC_NOT_FOUND: 1, COSMETIC_LEVEL_REQUIRED: 1, NOT_ENOUGH_MOON_COINS: 1, PROFILE_TEXT_NOT_ALLOWED: 1, LIFE_NOT_READY: 1, AVATAR_AI_UNAVAILABLE: 1,
   }).find((key) => raw.includes(key));
   throw new ApiError(messageFor(code || raw), 400, code);
 }
@@ -68,7 +69,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 async function profileFor(user: { id: string; email?: string | null }): Promise<SessionUser> {
   const { data, error } = await supabase.from("rede_lua_profiles")
-    .select("display_name,role,xp,level,streak_days,bio,profile_title,avatar_style,avatar_seed,avatar_config,profile_theme,profile_visibility,favorite_subjects,moon_coins,account_status,profile_handle,life_number,life_xp,legacy_stars,best_level")
+    .select("display_name,role,xp,level,streak_days,bio,profile_title,avatar_style,avatar_seed,avatar_config,profile_theme,profile_visibility,favorite_subjects,moon_coins,account_status,profile_handle,life_number,life_xp,legacy_stars,best_level,avatar_ai_prompt,avatar_ai_image_url,avatar_ai_seed,avatar_ai_generated_at")
     .eq("user_id", user.id)
     .single();
   if (error) dbError(error);
@@ -95,7 +96,18 @@ async function profileFor(user: { id: string; email?: string | null }): Promise<
     lifeXp: Number(data.life_xp || 0),
     legacyStars: Number(data.legacy_stars || 0),
     bestLevel: Number(data.best_level || data.level || 1),
+    avatarAiPrompt: data.avatar_ai_prompt || undefined,
+    avatarAiImageUrl: data.avatar_ai_image_url || undefined,
+    avatarAiSeed: data.avatar_ai_seed || undefined,
+    avatarAiGeneratedAt: data.avatar_ai_generated_at || null,
   };
+}
+
+async function authHeaders() {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) throw new ApiError("Entre na sua conta para continuar.", 401, "AUTH_REQUIRED");
+  return { Authorization: `Bearer ${token}` };
 }
 
 async function claimTeacher(code: string) {
@@ -598,6 +610,20 @@ export const api = {
     trackEvent("profile", "new_life", String(data?.lifeNumber || ""));
     return data as NewLifeResult;
   },
+
+  avatarAiEnhance: async (payload: { avatarStyle: AvatarStyle; avatarSeed?: string; avatarConfig: AvatarConfig; displayName?: string; profileTitle?: string; bio?: string; lifeNumber?: number; legacyStars?: number; savePreview?: boolean }): Promise<AvatarAiPreviewResult> => {
+    return request<AvatarAiPreviewResult>("/api/avatar/v2/enhance", {
+      method: "POST",
+      headers: await authHeaders(),
+      body: JSON.stringify(payload),
+    });
+  },
+  myNotifications: async (): Promise<UserNotification[]> => {
+    const data = await request<{ notifications: UserNotification[] }>("/api/notifications/me", { headers: await authHeaders() });
+    return Array.isArray(data.notifications) ? data.notifications : [];
+  },
+  notificationPing: async (id: string) => request<{ id: string; seen: boolean; timesToShow: number; timesShown: number; lastShownAt: string | null }>(`/api/notifications/${encodeURIComponent(id)}/ping`, { method: "POST", headers: await authHeaders() }),
+  notificationAck: async (id: string) => request<{ id: string; seen: boolean; timesToShow: number; timesShown: number; lastShownAt: string | null }>(`/api/notifications/${encodeURIComponent(id)}/ack`, { method: "POST", headers: await authHeaders() }),
 
   books: (q: string) => request<{ books: Array<{ key: string; title: string; authors: string[]; year: number | null; coverUrl: string | null }> }>(`/api/discover/books?q=${encodeURIComponent(q)}`),
   wiki: (q: string) => request<{ results: Array<{ title: string; extract: string; thumbnail: string | null; url: string | null }> }>(`/api/discover/wiki?q=${encodeURIComponent(q)}`),

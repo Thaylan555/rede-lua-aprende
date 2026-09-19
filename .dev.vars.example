@@ -13,3 +13,9 @@ CONTACT_FROM_EMAIL=Rede Lua <contato@redelua.xyz>
 VITE_SUPABASE_URL=https://SEU-PROJETO.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 VITE_DICEBEAR_API_URL=https://api.dicebear.com/10.x
+
+# Avatar AI (opcional)
+POLLINATIONS_BASE_URL=https://image.pollinations.ai/prompt
+POLLINATIONS_MODEL=flux
+# Se você tiver token, configure como secret no Cloudflare
+POLLINATIONS_TOKEN=

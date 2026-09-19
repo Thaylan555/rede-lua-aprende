@@ -60,6 +60,10 @@ export type SessionUser = {
   lifeXp: number;
   legacyStars: number;
   bestLevel: number;
+  avatarAiPrompt?: string;
+  avatarAiImageUrl?: string;
+  avatarAiSeed?: string;
+  avatarAiGeneratedAt?: string | null;
 };
 
 export type SessionResponse = {
@@ -394,6 +398,38 @@ export type LuaIdManifest = {
   player: PlayerProfile;
   creator: CreatorProfile | null;
   updatedAt: string;
+};
+
+export type AvatarAiPreviewResult = {
+  ok: true;
+  seed: string;
+  prompt: string;
+  summary: string;
+  provider: string;
+  model: string;
+  remoteUrl: string;
+  imageDataUrl: string;
+  stored?: {
+    ok: true;
+    imageUrl: string;
+    prompt: string;
+    seed: string;
+    provider: string;
+    generatedAt: string;
+  } | null;
+};
+
+export type UserNotification = {
+  id: string;
+  kind: string;
+  title: string;
+  message: string;
+  payload: Record<string, unknown>;
+  seen: boolean;
+  timesToShow: number;
+  timesShown: number;
+  lastShownAt: string | null;
+  createdAt: string;
 };
 
 export type ContactPayload = {

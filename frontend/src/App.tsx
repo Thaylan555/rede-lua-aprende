@@ -23,7 +23,7 @@ import { SupportV8 } from "./views/SupportV8";
 import { RecordsV9 } from "./views/RecordsV9";
 import { ImpactV9 } from "./views/ImpactV9";
 import { useRegionalVoice, type RegionalVoice } from "./regionalVoice";
-import type { Role } from "./types";
+import type { Role, UserNotification } from "./types";
 
 export type View = "home" | "learn" | "studio" | "profile" | "library" | "play" | "records" | "impact" | "support" | "admin";
 
@@ -63,6 +63,9 @@ export default function App() {
   const [commandOpen, setCommandOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [preferredRole, setPreferredRole] = useState<Exclude<Role, "admin">>("student");
+  const [activeNotification, setActiveNotification] = useState<UserNotification | null>(null);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notificationViewKey, setNotificationViewKey] = useState("");
   const [gameCode, setGameCode] = useState(() => {
     const q = location.hash.split("?")[1] || "";
     return (new URLSearchParams(q).get("code") || "").toUpperCase();
@@ -71,11 +74,22 @@ export default function App() {
   const session = useQuery({ queryKey: ["session"], queryFn: api.session, staleTime: 60_000, retry: 1 });
   const user = session.data?.user || null;
   const announcements = useQuery({ queryKey: ["announcements-v9", user?.role || "guest"], queryFn: () => api.activeAnnouncements(user?.role), staleTime: 45_000, retry: 1 });
+  const notifications = useQuery({ queryKey: ["user-notifications", user?.id], queryFn: api.myNotifications, enabled: Boolean(user), staleTime: 10_000, retry: 1 });
 
   const visibleNav = useMemo(() => navItems.filter((item) => item.id !== "admin" || user?.role === "admin"), [user?.role]);
   const mainNav = visibleNav.filter((item) => item.group === "main");
   const moreNav = visibleNav.filter((item) => item.group === "more");
   const mobileNav = mainNav.filter((item) => item.mobile);
+
+  const acknowledgeNotification = useMutation({
+    mutationFn: (id: string) => api.notificationAck(id),
+    onSuccess: async () => {
+      setNotificationOpen(false);
+      setActiveNotification(null);
+      await qc.invalidateQueries({ queryKey: ["user-notifications", user?.id] });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const logout = useMutation({
     mutationFn: api.logout,
@@ -112,6 +126,24 @@ export default function App() {
   useEffect(() => { trackPage(`Rede Lua • ${currentLabel}`, `${location.pathname}#/${view}`); }, [view, currentLabel]);
 
   const accountHint = user ? `${user.role === "teacher" ? "Professor" : user.role === "admin" ? "Gestão" : `Nível ${user.level}`} • Vida ${user.lifeNumber}` : "Entrar";
+
+  useEffect(() => {
+    if (!user || !notifications.data?.length) {
+      setActiveNotification(null);
+      setNotificationOpen(false);
+      return;
+    }
+    const target = notifications.data.find((item) => !item.seen && item.timesShown < item.timesToShow);
+    if (!target) return;
+    const key = `${target.id}:${view}`;
+    if (notificationViewKey === key) return;
+    setNotificationViewKey(key);
+    setActiveNotification(target);
+    setNotificationOpen(true);
+    void api.notificationPing(target.id)
+      .then(() => qc.invalidateQueries({ queryKey: ["user-notifications", user.id] }))
+      .catch(() => undefined);
+  }, [user?.id, view, notifications.data, notificationViewKey]);
 
   const renderView = () => {
     if (user?.accountStatus === "suspended" && view !== "admin") return <div className="v9-gate v9-page-width"><div className="v9-gate-orb"><ShieldCheck /></div><span>CONTA PAUSADA</span><h1>Seu acesso está temporariamente pausado.</h1><p>Se isso parece um engano, chama o suporte que a gente confere.</p><button className="v9-cta primary" onClick={() => go("support")}>Ir para o suporte</button></div>;
@@ -161,6 +193,8 @@ export default function App() {
     {drawerOpen && <div className="v9-drawer-layer"><button className="v9-drawer-backdrop" onClick={() => setDrawerOpen(false)} /><motion.aside className="v9-drawer" initial={{ x: -320 }} animate={{ x: 0 }}><div className="v9-drawer-head"><Brand compact /><button onClick={() => setDrawerOpen(false)}><X /></button></div><nav>{visibleNav.map(({ id, label, icon: Icon }) => <button key={id} className={view === id ? "active" : ""} onClick={() => go(id)}><Icon /><span>{label}</span></button>)}</nav><VoiceControl mode={voice.mode} onChange={voice.setMode} /></motion.aside></div>}
 
     {commandOpen && <div className="v9-command-layer"><button className="v9-dialog-backdrop" onClick={() => setCommandOpen(false)} /><motion.section className="v9-command" initial={{ opacity: 0, scale: .96, y: -12 }} animate={{ opacity: 1, scale: 1, y: 0 }}><div className="v9-command-head"><Sparkles /><div><strong>Comando Lunar</strong><small>Pra onde vamos agora?</small></div><kbd>ESC</kbd></div><div className="v9-command-grid">{visibleNav.map(({ id, label, icon: Icon }) => <button key={id} onClick={() => go(id)}><Icon /><span>{label}</span><small>{id === "records" ? "recordes e vidas" : id === "impact" ? "modo diretoria" : id === "learn" ? "trilha sem gabarito" : id === "studio" ? "criação do professor" : "abrir área"}</small></button>)}</div></motion.section></div>}
+
+    {notificationOpen && activeNotification && <div className="v93-notification-layer"><button className="v9-dialog-backdrop" onClick={() => setNotificationOpen(false)} /><motion.section className="v93-notification-modal" initial={{ opacity: 0, scale: .96, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }}><div className="v93-notification-icon"><MoonStar /></div><span className="v93-notification-badge">AVISO IMPORTANTE</span><h3>{activeNotification.title}</h3><p>{activeNotification.message}</p><div className="v93-notification-meta"><span>Exibido {Math.min(activeNotification.timesShown + 1, activeNotification.timesToShow)} de {activeNotification.timesToShow} vezes</span>{typeof activeNotification.payload?.lifeNumber === "number" && <strong>Vida {String(activeNotification.payload.lifeNumber)}</strong>}</div><div className="v93-notification-actions"><button className="v9-cta ghost" onClick={() => setNotificationOpen(false)}>Ver depois</button><button className="v9-cta primary" disabled={acknowledgeNotification.isPending} onClick={() => acknowledgeNotification.mutate(activeNotification.id)}>Entendi</button></div></motion.section></div>}
 
     <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} preferredRole={preferredRole} />
   </div>;

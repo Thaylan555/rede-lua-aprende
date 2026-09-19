@@ -6,4 +6,7 @@ export type Env = {
   RESEND_API_KEY?: string;
   CONTACT_TO_EMAIL?: string;
   CONTACT_FROM_EMAIL?: string;
+  POLLINATIONS_BASE_URL?: string;
+  POLLINATIONS_MODEL?: string;
+  POLLINATIONS_TOKEN?: string;
 };
